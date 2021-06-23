@@ -33,7 +33,7 @@ int ReadLineWithNumber();
 
 inline std::string_view RemoveSpaces(std::string_view str);
 
-std::vector<std::string>SplitIntoWords(char spliter, size_t initial_pos, std::string_view str);
+std::vector<std::string>GetRawData(char spliter, size_t initial_pos, std::string_view str);
 
 std::tuple<std::vector<std::string>,std::vector<std::pair<std::string,int>>> GetStopData(std::vector<std::string> raw_data);
 
@@ -43,7 +43,9 @@ Query ParseQuery(std::string_view str);
 
 void Fill(Queres queres,TransportCatalogue& catalog);
 
-Bus ConstractBus(const TransportCatalogue& catalog, std::string_view bus_number, const std::vector<std::string>& values, bool is_line);
+Bus ConstractBus(const TransportCatalogue& catalog, std::string_view bus_number, const std::vector<std::string>& stops_name, bool is_line);
+
+Stop ConstractStop(std::string_view stop_name, double lat,double lng);
 
 }
 }

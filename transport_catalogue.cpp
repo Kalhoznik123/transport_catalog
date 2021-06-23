@@ -14,9 +14,8 @@ void TransportCatalogue::AddBus(Bus bus){
   }
 }
 
-void TransportCatalogue::AddStop(std::string_view stop_name, double lat,double lng){
-  detail::Coordinates coor{lat,lng};
-  Stop stop{std::string(stop_name),coor};
+void TransportCatalogue::AddStop(Stop stop){
+
   const auto& inset_stop = stops_.emplace_back(std::move(stop));
   stop_name_to_stop_[inset_stop.name] = &inset_stop;
   stops_to_bus_[&inset_stop];

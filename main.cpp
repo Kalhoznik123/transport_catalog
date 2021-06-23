@@ -8,6 +8,9 @@ using namespace transport_catalogue;
 
 int main(){
 
+
+
+
   TransportCatalogue catalog;
 
   int query_count = input_reader::ReadLineWithNumber();
@@ -21,11 +24,13 @@ int main(){
   int bus_query_count = stat_reader::ReadLineWithNumber();
 
   for(int i  = 0;i<bus_query_count;++i){
-    const auto query = stat_reader::ReadLine();
-    if(query[0] == 'S'){
-      stat_reader::PrintStopInformation(catalog,stat_reader::GetNumberFromQuery(query));
-    }else{
-      stat_reader::PrintBusInformation(catalog,stat_reader::GetNumberFromQuery(query));
+    //const auto query = stat_reader::ReadLine();
+    const stat_reader::Query query = stat_reader::ParseQuery(stat_reader::ReadLine());
+
+    if(query.type == stat_reader::QueryType::STOP){
+      stat_reader::PrintStopInformation(catalog,query.item_name);
+    }else if (query.type == stat_reader::QueryType::BUS){
+      stat_reader::PrintBusInformation(catalog,query.item_name);
     }
 
   }

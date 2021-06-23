@@ -17,9 +17,18 @@ int ReadLineWithNumber() {
   return result;
 }
 
-std::string_view GetNumberFromQuery(std::string_view query){
-  size_t space  = query.find(' ',0);
-  query.remove_prefix(space + 1);
+Query ParseQuery(std::string_view raw_query){
+
+  stat_reader::Query query;
+  size_t space_pos  = raw_query.find(' ',0);
+
+  if(raw_query.substr(0,space_pos) == "Stop"){
+    query.type = QueryType::STOP;
+
+  }else if(raw_query.substr(0,space_pos) == "Bus")
+    query.type = QueryType::BUS;
+  // raw_query.remove_prefix(space_pos + 1);
+  query.item_name = raw_query.substr(space_pos + 1,std::string::npos);
   return query;
 }
 

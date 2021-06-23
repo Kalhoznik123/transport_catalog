@@ -20,14 +20,14 @@ int ReadLineWithNumber() {
 }
 
 
-std::vector<std::string> SplitIntoWords(char spliter, size_t initial_pos, std::string_view str){
+std::vector<std::string> GetRawData(char spliter, size_t initial_pos, std::string_view str){
   int64_t pos = initial_pos;
   const int64_t pos_end = str.npos;
   std::vector<std::string> result;
 
   while (true) {
     int64_t space = str.find(spliter, pos);
-    // 5
+
     std::string_view temp = space == pos_end ? str.substr(pos) : str.substr(pos, space - pos);
 
     result.push_back(std::string(RemoveSpaces(temp)));
@@ -58,7 +58,7 @@ std::string_view RemoveSpaces(std::string_view str){
 Queres ReadQueres(size_t count){
   Queres result;
   for (size_t i = 0; i < count;++i){
-    std::string s =ReadLine() ;
+    std::string s = ReadLine() ;
 
     if(s[0] == 'S'){
       result.stop_queres_.push_back(std::move(s));
@@ -83,10 +83,10 @@ Query ParseQuery(std::string_view str){
   if(str[0] != 'S'){
     spliter = str.find('>',0) == str.npos ? '-':'>';
     query.is_line = spliter == '-';
-    query.values = SplitIntoWords(spliter,double_dot_pos + 1,str);
+    query.values = GetRawData(spliter,double_dot_pos + 1,str);
   }else{
 
-    auto [coordinates,distances_to_stops] = GetStopData(SplitIntoWords(spliter,double_dot_pos + 1,str));
+    auto [coordinates,distances_to_stops] = GetStopData(GetRawData(spliter,double_dot_pos + 1,str));
     query.values = std::move(coordinates);
     query.stops_to_distance = std::move(distances_to_stops);
 
@@ -98,15 +98,19 @@ Query ParseQuery(std::string_view str){
 void Fill(Queres queres, TransportCatalogue &catalog){
 
   if(!queres.stop_queres_.empty()){
-    std::vector<std::pair<std::string,std::vector<std::pair<std::string, int>>>> stops_to_naibhor_stop_distance;
+
+    using  DistanceToNeibhor = std::pair<std::string, int>;
+
+    std::vector<std::pair<std::string,std::vector<DistanceToNeibhor>>> stops_to_naibhor_stop_distance;
     for(auto& query: queres.stop_queres_){
       Query q = ParseQuery(query);
       stops_to_naibhor_stop_distance.emplace_back(q.name,std::move(q.stops_to_distance));
       assert(q.values.size() == 2);
-      catalog.AddStop(q.name,std::stod(q.values[0]),std::stod(q.values[1]));
+      catalog.AddStop(ConstractStop(q.name,std::stod(q.values[0]),std::stod(q.values[1])));
+
     }
-    for(auto& [stop_name,stop_to_distance]:stops_to_naibhor_stop_distance){
-      for(auto& [neibhor_stop_name,distance]: stop_to_distance){
+    for(const auto& [stop_name,distance_to_neibhor]:stops_to_naibhor_stop_distance){
+      for(const auto& [neibhor_stop_name,distance]: distance_to_neibhor){
         catalog.SetDistaceBetweenStops(stop_name,neibhor_stop_name,distance);
       }
     }
@@ -121,19 +125,21 @@ void Fill(Queres queres, TransportCatalogue &catalog){
 }
 
 std::tuple<std::vector<std::string>, std::vector<std::pair<std::string, int> > > GetStopData(std::vector<std::string> raw_data){
+  using  DistanceToNeibhor = std::pair<std::string, int>;
+
   std::vector<std::string> coordinates;
-  std::vector<std::pair<std::string,int>> distace_to_stop;
+  std::vector<DistanceToNeibhor> distace_to_stop;
 
   for(const auto& data:raw_data){
     const std::string templ = " to ";
 
-    size_t templ_pos = data.find(templ);
+    const  size_t templ_pos = data.find(templ);
 
     if(templ_pos !=data.npos){
       std::string stop = data.substr(templ_pos+templ.size());
-      std::string dist = data.substr(0,data.find(' '));
-      int dis = std::stoi(dist.substr(0,dist.size() - 1));
-      distace_to_stop.emplace_back(stop,dis);
+      std::string distance = data.substr(0,data.find(' '));
+      int dis = std::stoi(distance.substr(0,distance.size() - 1));
+      distace_to_stop.emplace_back(std::move(stop),dis);
     }else{
       coordinates.push_back(std::move(data));
     }
@@ -186,6 +192,11 @@ Bus ConstractBus(const TransportCatalogue &catalog, std::string_view bus_number,
   bus.route_length = route_length;
   bus.curvature = bus.route_length/georafical_distance;
   return bus;
+}
+
+Stop ConstractStop(std::string_view stop_name, double lat, double lng){
+
+  return {std::string(stop_name),{lat,lng}};
 }
 
 }

@@ -44,7 +44,10 @@ public:
 
   void AddBus(Bus bus);
 
-  void AddStop(std::string_view stop_name, double lat, double lng);
+
+  void AddStop(Stop stop);
+
+
 
   const Bus* GetBus(std::string_view bus_number)const;
 
