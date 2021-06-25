@@ -25,7 +25,6 @@ struct Bus{
   std::vector<std::string> stops_name;
 };
 
-
 class TransportCatalogue{
 
 public:
@@ -40,14 +39,9 @@ public:
     std::hash<const void*> h1;
   };
 
-
-
   void AddBus(Bus bus);
 
-
   void AddStop(Stop stop);
-
-
 
   const Bus* GetBus(std::string_view bus_number)const;
 
@@ -58,7 +52,6 @@ public:
   void SetDistaceBetweenStops(std::string_view stop_from, std::string_view stop_to,double distace );
 
   double GetDistanceBetweenStops(std::string_view stop_from, std::string_view stop_to)const;
-
 
   std::pair<std::string,const Bus*> FindBus(std::string_view bus_number){
     if(!bus_name_to_bus_.count(bus_number))

@@ -91,7 +91,6 @@ Query ParseQuery(std::string_view str){
     query.stops_to_distance = std::move(distances_to_stops);
 
   }
-
   return query;
 }
 

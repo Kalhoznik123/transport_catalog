@@ -4,10 +4,10 @@
 #include <iostream>
 #include <cmath>
 #include <string_view>
-#include "transport_catalogue.h"
 #include <utility>
 #include <tuple>
 #include <cassert>
+#include "transport_catalogue.h"
 
 namespace transport_catalogue {
 
@@ -25,7 +25,6 @@ struct Queres{
   std::vector<std::string> stop_queres_;
   std::vector<std::string> bus_queres_;
 };
-
 
 std::string ReadLine();
 

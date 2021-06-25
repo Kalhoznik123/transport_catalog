@@ -5,7 +5,6 @@ namespace transport_catalogue {
 
 void TransportCatalogue::AddBus(Bus bus){
 
-  //Bus bus = MakeBus(std::move(bus_number),stops,is_line);
   const auto& inset_bus = buses_.emplace_back(std::move(bus));
   bus_name_to_bus_[inset_bus.number] = &inset_bus;
 

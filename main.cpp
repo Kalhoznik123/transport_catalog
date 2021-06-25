@@ -8,9 +8,6 @@ using namespace transport_catalogue;
 
 int main(){
 
-
-
-
   TransportCatalogue catalog;
 
   int query_count = input_reader::ReadLineWithNumber();
@@ -18,7 +15,6 @@ int main(){
   auto query = input_reader::ReadQueres(query_count);
 
   Fill(std::move(query),catalog);
-
 
   /// ниже выполняются запросы на вывод
   int bus_query_count = stat_reader::ReadLineWithNumber();

@@ -19,7 +19,6 @@ struct Query{
   std::string item_name;
 };
 
-
 std::string ReadLine();
 
 int ReadLineWithNumber();
