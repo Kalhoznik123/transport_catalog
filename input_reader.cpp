@@ -5,8 +5,6 @@ namespace transport_catalogue {
 
 namespace input_reader{
 
-
-
 std::string ReadLine(std::istream& stream){
   std::string s ;
   std::getline(stream,s);

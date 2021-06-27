@@ -21,7 +21,6 @@ int main(){
     //const auto query = stat_reader::ReadLine();
     const stat_reader::Query query = stat_reader::ParseQuery(stat_reader::ReadLine());
 
-
     switch (query.type) {
     case stat_reader::QueryType::STOP:
        stat_reader::PrintStopInformation(catalog,query.item_name,std::cout);
@@ -30,13 +29,6 @@ int main(){
       stat_reader::PrintStopInformation(catalog,query.item_name,std::cout);
 
     }
-
-//    if(query.type == stat_reader::QueryType::STOP){
-//      stat_reader::PrintStopInformation(catalog,query.item_name,std::cout);
-//    }else if (query.type == stat_reader::QueryType::BUS){
-//      stat_reader::PrintBusInformation(catalog,query.item_name,std::cout);
-//    }
-
   }
 
 }

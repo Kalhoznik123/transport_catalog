@@ -47,8 +47,6 @@ std::string_view RemoveStartEndSpaces(std::string_view str);
 
 std::vector<std::string> SplitStringWithValues(char spliter, size_t initial_pos, std::string_view str);
 
-
-
 Queres ReadQueres(size_t count,std::istream& stream);
 
 std::variant<BusQuery,StopQuery> ParseQuery(std::string_view str);

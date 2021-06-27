@@ -20,8 +20,6 @@ struct Query{
 
 std::string ReadLine();
 
-
-
 Query ParseQuery(std::string_view raw_query);
 
 void PrintBusInformation(const TransportCatalogue& catalog, std::string_view bus_number,std::ostream& stream);
