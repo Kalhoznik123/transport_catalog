@@ -2,9 +2,9 @@
 
 #include <cmath>
 
-namespace transport_catalogue {
 
-namespace detail {
+
+namespace geography {
 
 struct Coordinates {
     double lat;
@@ -20,4 +20,4 @@ inline double ComputeDistance(Coordinates from, Coordinates to) {
 }
 
 }
-}
+

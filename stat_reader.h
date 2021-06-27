@@ -2,7 +2,6 @@
 #include <string>
 #include <iostream>
 #include <string_view>
-#include <iomanip>
 #include "transport_catalogue.h"
 
 namespace  transport_catalogue {
@@ -21,13 +20,13 @@ struct Query{
 
 std::string ReadLine();
 
-int ReadLineWithNumber();
+
 
 Query ParseQuery(std::string_view raw_query);
 
-void PrintBusInformation(const TransportCatalogue& catalog, std::string_view bus_number);
+void PrintBusInformation(const TransportCatalogue& catalog, std::string_view bus_number,std::ostream& stream);
 
-void PrintStopInformation(const TransportCatalogue& catalog, std::string_view stop_name);
+void PrintStopInformation(const TransportCatalogue& catalog, std::string_view stop_name,std::ostream& stream);
 
 }
 }

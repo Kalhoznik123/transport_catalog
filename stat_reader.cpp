@@ -1,3 +1,4 @@
+#include <iomanip>
 #include "stat_reader.h"
 
 namespace transport_catalogue {
@@ -10,12 +11,7 @@ std::string ReadLine(){
   return  s;
 }
 
-int ReadLineWithNumber() {
-  int result;
-  std::cin >> result;
-  ReadLine();
-  return result;
-}
+
 
 Query ParseQuery(std::string_view raw_query){
 
@@ -32,31 +28,31 @@ Query ParseQuery(std::string_view raw_query){
   return query;
 }
 
-void PrintBusInformation(const TransportCatalogue &catalog, std::string_view bus_number){
-  auto bus = catalog.GetBus(bus_number);
+void PrintBusInformation(const TransportCatalogue &catalog, std::string_view bus_number,std::ostream& stream){
+ const auto bus = catalog.GetBus(bus_number);
   if(bus == nullptr){
-    std::cout<<"Bus " << bus_number<<": not found"<<std::endl;
+    stream<<"Bus " << bus_number<<": not found"<<std::endl;
   }else{
-    std::cout<<"Bus " <<bus->number<<": "<<bus->all_stops_count<<" stops on route, " <<bus->uniqe_stops_count<<" unique stops, " <<std::setprecision(6)
+    stream<<"Bus " <<bus->number<<": "<<bus->all_stops_count<<" stops on route, " <<bus->unique_stops_count<<" unique stops, " <<std::setprecision(6)
               << bus->route_length<<" route length, " << bus->curvature << " curvature" <<std::endl;
   }
 }
 
-void PrintStopInformation(const TransportCatalogue &catalog, std::string_view stop_name){
+void PrintStopInformation(const TransportCatalogue &catalog, std::string_view stop_name,std::ostream& stream){
 
   auto stop = catalog.GetStop(stop_name);
   if(stop == nullptr){
-    std::cout<<"Stop " << stop_name<<": not found"<<std::endl;
+    stream<<"Stop " << stop_name<<": not found"<<std::endl;
   }else{
-    const auto& buses = catalog.GetStopInformation(stop->name);
+    const auto& buses = catalog.GetBusesToStop(stop->name);
     if(buses.empty()){
-      std::cout<< "Stop " << stop_name<<": no buses"<<std::endl;
+      stream<< "Stop " << stop_name<<": no buses"<<std::endl;
     }else{
-      std::cout<< "Stop " << stop_name<<": buses";
+      stream<< "Stop " << stop_name<<": buses";
       for(const auto& bus : buses){
-        std::cout <<' '<<bus;
+        stream <<' '<<bus;
       }
-      std::cout<<std::endl;
+     stream<<std::endl;
     }
 
   }
