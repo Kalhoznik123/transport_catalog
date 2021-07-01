@@ -6,16 +6,12 @@
 using namespace std;
 using namespace transport_catalogue;
 
-
-
 int ReadLineWithNumber(std::istream& stream ) {
   int result;
   std::cin >> result;
   input_reader::ReadLine(stream);
   return result;
 }
-
-
 
 int main(){
 
@@ -27,9 +23,9 @@ int main(){
 
   /// ниже выполняются запросы на вывод
 
-  int bus_query_count = ReadLineWithNumber(std::cin);
+  int stat_query_count = ReadLineWithNumber(std::cin);
 
-  for(int i  = 0;i<bus_query_count;++i){
+  for(int i  = 0;i<stat_query_count;++i){
     const stat_reader::Query query = stat_reader::ParseQuery(stat_reader::ReadLine());
 
     switch (query.type) {
