@@ -106,7 +106,7 @@ void Fill(Queries queres, TransportCatalogue &catalog){
 }
 
 
-Bus CreateBus(const TransportCatalogue &catalog, std::string_view bus_number, const std::vector<std::string> &stops, bool is_line)  {
+Bus CreateBus(const TransportCatalogue &catalog, std::string_view bus_number, const std::vector<std::string> &stops, bool is_direct_route)  {
   Bus bus;
   bus.number = std::move(bus_number);
   double geographical_distance = 0;
@@ -114,7 +114,7 @@ Bus CreateBus(const TransportCatalogue &catalog, std::string_view bus_number, co
 
   std::unordered_set<std::string_view> unique_stops;
 
-  if(is_line){
+  if(is_direct_route){
     auto prev = catalog.GetStop(stops[0]);
     for(size_t i =0;i< stops.size();++i ){
       if(i == 0){
