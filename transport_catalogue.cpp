@@ -5,19 +5,19 @@ namespace transport_catalogue {
 
 void TransportCatalogue::AddBus(Bus bus){
   buses_.push_back(std::move(bus));
-  const auto& inset_bus = buses_.back();
-  buses_name_to_bus_[inset_bus.number] = &inset_bus;
+  const auto& inserted_bus = buses_.back();
+  buses_name_to_bus_[inserted_bus.number] = &inserted_bus;
 
-  for(const auto& stop: inset_bus.stops_name){
-    stop_to_buses_name_[GetStop(stop)].insert(inset_bus.number);
+  for(const auto& stop: inserted_bus.stops_name){
+    stop_to_buses_name_[GetStop(stop)].insert(inserted_bus.number);
   }
 }
 
 void TransportCatalogue::AddStop(Stop stop){
   stops_.push_back(std::move(stop));
-  const auto& inset_stop = stops_.back();
-  stops_name_to_stop_[inset_stop.name] = &inset_stop;
-  stop_to_buses_name_[&inset_stop];
+  const auto& inserted_stop = stops_.back();
+  stops_name_to_stop_[inserted_stop.name] = &inserted_stop;
+  stop_to_buses_name_[&inserted_stop] = {};
 }
 
 const Bus *TransportCatalogue::GetBus(std::string_view bus_number) const {
