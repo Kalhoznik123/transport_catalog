@@ -13,14 +13,6 @@ namespace transport_catalogue {
 namespace input_reader {
 
 
-struct Query {
-  std::string name;
-  bool is_direct_route = false ;
-  std::vector<std::string> values;
-  std::vector<std::pair<std::string,int>> stops_to_distance;
-};
-
-
 struct BusQuery{
   std::string name;
   bool is_direct_route = false ;
@@ -29,34 +21,34 @@ struct BusQuery{
 
 struct StopQuery{
   std::string name;
-  double lat;
-  double lng;
+  geography::Coordinates coordinates;
   std::vector<std::pair<std::string,int>> stops_to_distance;
 };
 
-struct Queres{
+struct Queries{
   std::vector<std::string> stop_queres_;
   std::vector<std::string> bus_queres_;
 };
 
 std::string ReadLine(std::istream& stream);
 
-int ReadLineWithNumber();
 
 std::string_view RemoveStartEndSpaces(std::string_view str);
 
-std::vector<std::string> SplitStringWithValues(char spliter, size_t initial_pos, std::string_view str);
+std::vector<std::string> SplitStringWithValues(char splitter, size_t initial_pos, std::string_view str);
 
-Queres ReadQueres(size_t count,std::istream& stream);
-
-std::variant<BusQuery,StopQuery> ParseQuery(std::string_view str);
+Queries ReadQueres(size_t count,std::istream& stream);
 
 
-void Fill(Queres queres,TransportCatalogue& catalog);
+BusQuery ParseBusQuery(std::string_view str);
+
+StopQuery ParseStopQuery(std::string_view str);
+
+void Fill(Queries queres,TransportCatalogue& catalog);
 
 Bus CreateBus(const TransportCatalogue& catalog, std::string_view bus_number, const std::vector<std::string>& stops_name, bool is_line);
 
-Stop CreateStop(std::string_view stop_name, double lat,double lng);
+Stop CreateStop(std::string_view stop_name, geography::Coordinates coordinates);
 
 }
 }

@@ -29,12 +29,12 @@ Query ParseQuery(std::string_view raw_query){
 }
 
 void PrintBusInformation(const TransportCatalogue &catalog, std::string_view bus_number,std::ostream& stream){
- const auto bus = catalog.GetBus(bus_number);
+  const auto bus = catalog.GetBus(bus_number);
   if(bus == nullptr){
     stream<<"Bus " << bus_number<<": not found"<<std::endl;
   }else{
     stream<<"Bus " <<bus->number<<": "<<bus->all_stops_count<<" stops on route, " <<bus->unique_stops_count<<" unique stops, " <<std::setprecision(6)
-              << bus->route_length<<" route length, " << bus->curvature << " curvature" <<std::endl;
+           << bus->route_length<<" route length, " << bus->curvature << " curvature" <<std::endl;
   }
 }
 
@@ -44,7 +44,7 @@ void PrintStopInformation(const TransportCatalogue &catalog, std::string_view st
   if(stop == nullptr){
     stream<<"Stop " << stop_name<<": not found"<<std::endl;
   }else{
-    const auto& buses = catalog.GetBusesToStop(stop->name);
+    const auto& buses = catalog.GetBuses(stop->name);
     if(buses.empty()){
       stream<< "Stop " << stop_name<<": no buses"<<std::endl;
     }else{
@@ -52,7 +52,7 @@ void PrintStopInformation(const TransportCatalogue &catalog, std::string_view st
       for(const auto& bus : buses){
         stream <<' '<<bus;
       }
-     stream<<std::endl;
+      stream<<std::endl;
     }
 
   }

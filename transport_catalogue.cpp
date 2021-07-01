@@ -14,8 +14,8 @@ void TransportCatalogue::AddBus(Bus bus){
 }
 
 void TransportCatalogue::AddStop(Stop stop){
-
-  const auto& inset_stop = stops_.emplace_back(std::move(stop));
+  stops_.push_back(std::move(stop));
+  const auto& inset_stop = stops_.back();
   stops_name_to_stop_[inset_stop.name] = &inset_stop;
   stop_to_buses_name_[&inset_stop];
 }
@@ -36,7 +36,7 @@ const Stop *TransportCatalogue::GetStop(std::string_view stop_name) const {
   return find_item_iter->second;
 }
 
-const std::set<std::string_view> &TransportCatalogue::GetBusesToStop(std::string_view stop_name) const {
+const std::set<std::string_view> &TransportCatalogue::GetBuses(std::string_view stop_name) const {
 
   return stop_to_buses_name_.at(GetStop(stop_name));
 }
@@ -47,10 +47,10 @@ void TransportCatalogue::SetDistaceBetweenStops(const Stop* stop, const Stop* ne
 
 double TransportCatalogue::GetDistanceBetweenStops(const Stop* stop, const Stop* neighbour_stop) const {
 
-  const auto stops = std::make_pair(stop,neighbour_stop);
+
   double result = 0;
 
-  const auto find_item_iter = stops_pair_to_distance_.find(std::move(stops));
+  const auto find_item_iter = stops_pair_to_distance_.find(std::make_pair(stop,neighbour_stop));
 
 
   if(find_item_iter != stops_pair_to_distance_.end()){

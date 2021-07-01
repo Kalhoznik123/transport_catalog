@@ -37,7 +37,7 @@ public:
 
   const Stop* GetStop(std::string_view stop_name)const;
 
-  const std::set<std::string_view>& GetBusesToStop(std::string_view stop_name)const;
+  const std::set<std::string_view>& GetBuses(std::string_view stop_name)const;
 
   void SetDistaceBetweenStops(const Stop* stop, const Stop* neighbour_stop,double distace );
 
@@ -46,12 +46,12 @@ public:
 private:
   struct StopsPairHasher {
     size_t operator() (const std::pair<const Stop*, const Stop*>& pair) const {
-      size_t h_1 = h1(pair.first);
-      size_t h_2 = h1(pair.second);
+      const size_t h_1 = stop_pointer_hasher(pair.first);
+      const size_t h_2 = stop_pointer_hasher(pair.second);
       return h_2 + h_1 * (13 * 13);
     }
   private:
-    std::hash<const void*> h1;
+    std::hash<const void*> stop_pointer_hasher;
   };
 
 
