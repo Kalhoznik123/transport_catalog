@@ -1,66 +1,77 @@
+// напишите решение с нуля
+// код сохраните в свой git-репозиторий
 #pragma once
+#include <string>
+#include <vector>
+#include <list>
 #include <deque>
 #include <unordered_map>
 #include <unordered_set>
-#include <string>
-#include <vector>
-#include <string_view>
+#include <map>
+#include <functional>
 #include <set>
 #include "geo.h"
+#include <iostream>
+#include "domain.h"
 
-namespace transport_catalogue {
+namespace transport {
 
 
-struct Stop{
-  std::string name;
-  geography::Coordinates coordinates;
-};
+template <typename DomainPtr>
+void SortByName(std::deque<DomainPtr>& container) {
+    sort(container.begin(), container.end(),
+            [](const DomainPtr& lhs, const DomainPtr& rhs) {
+                return lhs->name < rhs->name;
+            }
+    );
+}
 
-struct Bus{
-  std::string number;
-  double route_length = 0;
-  double curvature =0;
-  size_t unique_stops_count = 0;
-  size_t all_stops_count = 0;
-  std::vector<std::string> stops_name;
-};
 
-class TransportCatalogue{
-
+class Catalogue {
 public:
 
-  void AddBus(Bus bus);
+    // добавление маршрута в базу
+  void AddBus(transport::Bus bus);
 
-  void AddStop(Stop stop);
+  // добавление остановки в базу
+  void AddStop(transport::Stop stop);
 
-  const Bus* GetBus(std::string_view bus_number)const;
+  //получение информации о маршруте
+  BusInformation GetBusInformation(const transport::Bus* bus) const;
 
-  const Stop* GetStop(std::string_view stop_name)const;
+  // получение списка автобусов
+  stopInfoStruct GetStopInformation(const transport::Stop* stop) const;
 
-  const std::set<std::string_view>& GetBuses(std::string_view stop_name)const;
+  void SetDistanceBeetweenStops(const std::string_view& from, const std::string_view& to, double distance);
 
-  void SetDistaceBetweenStops(const Stop* stop, const Stop* neighbour_stop,double distace );
+  // поиск маршрута по имени
+  const Bus* GetBus(const std::string_view& num) const;
 
-  double GetDistanceBetweenStops(const Stop* stop, const Stop* neighbour_stop)const;
+  // поиск остановки по имени
+  const Stop* GetStop(const std::string_view& name) const;
+
+  std::deque<const transport::Stop*> GetAllStopsSortedByName() const;
+
+  std::vector<geo::Coordinates> GetAllPoints() const;
+
+  std::deque<const transport::Bus*> GetAllBusesSortedByName() const;
 
 private:
   struct StopsPairHasher {
-    size_t operator() (const std::pair<const Stop*, const Stop*>& pair) const {
-      const size_t h_1 = stop_pointer_hasher(pair.first);
-      const size_t h_2 = stop_pointer_hasher(pair.second);
-      return h_2 + h_1 * (13 * 13);
-    }
+    size_t operator()(const std::pair<const transport::Stop*, const transport::Stop*>& pair) const;
   private:
-    std::hash<const void*> stop_pointer_hasher;
-  };
+        std::hash<const void*> h1;
+    };
+    // получить расстояние между остановками
+    double GetDistanceBetweenStops(const Stop* from, const Stop* to) const;
 
+    std::unordered_map<std::string, const Stop*, std::hash<std::string>> name_to_stop_;
+    std::unordered_map<std::string, const Bus*, std::hash<std::string>> name_to_bus;
+    std::unordered_map<const Stop*, std::set<const transport::Bus*>> stop_to_buses_;
+    std::unordered_map<std::pair<const Stop*, const Stop*>, double, StopsPairHasher> stop_pair_to_distance_;
 
-  std::deque<Bus> buses_;
-  std::deque<Stop> stops_;
-  std::unordered_map<std::string_view,const Bus*> buses_name_to_bus_;
-  std::unordered_map<std::string_view,const Stop*> stops_name_to_stop_;
-  std::unordered_map<const Stop*,std::set<std::string_view>> stop_to_buses_name_;
-  std::unordered_map<const std::pair<const Stop*, const Stop*>, double, StopsPairHasher> stops_pair_to_distance_;
+    std::deque<Stop> stops_;
+    std::deque<Bus> buses_;
 };
 
-}
+} // namespace transport
