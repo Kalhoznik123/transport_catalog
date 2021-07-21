@@ -15,7 +15,7 @@ std::optional<transport::BusInformation> RequestHandler::GetBusStat(const std::s
     }
 }
 
-std::optional<transport::stopInfoStruct> RequestHandler::GetBusesByStop(const std::string_view& stop_name) const {
+std::optional<transport::StopInformation> RequestHandler::GetBusesByStop(const std::string_view& stop_name) const {
 
     auto stop = db_.GetStop(stop_name);
 

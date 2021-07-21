@@ -30,7 +30,7 @@ void Circle::RenderObject(const RenderContext& context) const {
     auto& out = context.out;
     out << "<circle cx=\""sv << center_.x << "\" cy=\""sv << center_.y << "\" "sv;
     out << "r=\""sv << radius_ << "\""sv;
-    RenderAttrs(context.out);
+    RenderAttrs(out);
     out << " />"sv;
 }
 // добавляем к объекту точки
@@ -76,19 +76,19 @@ Text& Text::SetFontSize(uint32_t size) {
 
 // Задаёт название шрифта (атрибут font-family)
 Text& Text::SetFontFamily(std::string font_family) {
-    font_family_ = font_family;
+  font_family_ = std::move(font_family);
     return *this;
 }
 
 // Задаёт толщину шрифта (атрибут font-weight)
 Text& Text::SetFontWeight(std::string font_weight) {
-    font_weight_ = font_weight;
+  font_weight_ = std::move(font_weight);
     return *this;
 }
 
 // Задаёт текстовое содержимое объекта (отображается внутри тега text)
 Text& Text::SetData(std::string data) {
-    data_ = data;
+  data_ = std::move(data);
     return *this;
 }
 
@@ -146,13 +146,13 @@ void OutRgb::operator()(Rgb rgb) const {
 
 void OutRgb::operator()(Rgba rgba) const {
     using namespace std::string_view_literals;
-    std::string str = std::to_string(rgba.opacity);
-    std::string opacity;
-    for (int i = 0; i<3; ++i) {
-        if (i<static_cast<int>(str.size())) {
-            opacity += str[i];
-        }
-    }
+//    std::string str = std::to_string(rgba.opacity);
+//    std::string opacity;
+//    for (int i = 0; i<3; ++i) {
+//        if (i<static_cast<int>(str.size())) {
+//            opacity += str[i];
+//        }
+//    }
     out << "rgba("sv << std::to_string(rgba.red)
         << ","sv << std::to_string(rgba.green)
         << ","sv << std::to_string(rgba.blue)

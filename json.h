@@ -30,8 +30,6 @@ public:
     Node(std::string value) : NodeValue(value) {}
     Node(std::nullptr_t) : NodeValue() {}
 
-    //bool operator==(const Node& other) const;
-    //bool operator!=(const Node& other) const;
 
     bool IsNull() const;
     bool IsArray() const;
@@ -50,7 +48,7 @@ public:
     const NodeValue& GetValue() const;
 
 private:
-    //NodeValue value_;
+
 };
 
 class Document;

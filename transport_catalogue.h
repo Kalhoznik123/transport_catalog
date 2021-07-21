@@ -40,7 +40,7 @@ public:
   BusInformation GetBusInformation(const transport::Bus* bus) const;
 
   // получение списка автобусов
-  stopInfoStruct GetStopInformation(const transport::Stop* stop) const;
+  StopInformation GetStopInformation(const transport::Stop* stop) const;
 
   void SetDistanceBeetweenStops(const std::string_view& from, const std::string_view& to, double distance);
 

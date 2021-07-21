@@ -27,7 +27,7 @@ struct BusInformation {
     double curvature = 0;
 };
 
-struct stopInfoStruct {
+struct StopInformation {
 
     std::unordered_set<const Bus*> buses;
 };

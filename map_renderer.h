@@ -7,7 +7,7 @@
 #include "geo.h"
 #include "domain.h"
 
-using namespace std::string_literals;
+
 
 /*
  * В этом файле вы можете разместить код, отвечающий за визуализацию карты маршрутов в формате SVG.
@@ -16,7 +16,7 @@ using namespace std::string_literals;
  */
 
 namespace renderer {
-
+using namespace std::string_literals;
 struct RenderSettings {
     double width = 1200.0;
     double height = 1200.0;
@@ -99,23 +99,24 @@ public:
     // установить настройки рендеринга
     void setVisualisationSettings(RenderSettings settings);
 
-    template <typename iterator>
-    void DrawBusRouteNumber(svg::Document& doc, SphereProjector& projector, const iterator begin, const iterator end) const;
-
-    template <typename iterator>
-    void DrawBusRouteLine(svg::Document& doc, SphereProjector& projector, const iterator begin, const iterator end) const;
-
-    template <typename iterator>
-    void DrawStops(svg::Document& doc, SphereProjector& projector, const iterator begin, const iterator end) const;
-
-    template <typename iterator>
-    void DrawStopsName(svg::Document& doc, SphereProjector& projector, const iterator begin, const iterator end) const;
 
     template <typename Stops, typename Buses, typename Points>
     void Render(svg::Document& doc, const Stops& stops, const Buses& buses, const Points& points) const;
 
   private:
     RenderSettings settings_;
+
+    template <typename iterator>
+    void DrawBusRouteNumber(svg::Document& doc, const SphereProjector& projector, const iterator begin, const iterator end) const;
+
+    template <typename iterator>
+    void DrawBusRouteLine(svg::Document& doc, const SphereProjector& projector, const iterator begin, const iterator end) const;
+
+    template <typename iterator>
+    void DrawStops(svg::Document& doc,const SphereProjector& projector, const iterator begin, const iterator end) const;
+
+    template <typename iterator>
+    void DrawStopsName(svg::Document& doc, const SphereProjector& projector, const iterator begin, const iterator end) const;
 
     svg::Polyline MakeBusRouteLine(size_t color_count)const;
 
@@ -141,8 +142,8 @@ void MapRenderer::Render(svg::Document& doc, const StopsContainer& stops, const 
 }
 
 template <typename BusIterator>
-void MapRenderer::DrawBusRouteNumber(svg::Document& doc, SphereProjector& projector, const BusIterator begin, const BusIterator end) const {
-  using namespace std::string_literals;
+void MapRenderer::DrawBusRouteNumber(svg::Document& doc,const SphereProjector& projector, const BusIterator begin, const BusIterator end) const {
+
   size_t color_count = 0; // счётчик цветов
   for (auto it = begin; it!= end; ++it) {
     svg::Text start_stop_background = MakeBusRouteNumberBackground((*it)->name,projector((*it)->start_stop->coordinate));
@@ -167,7 +168,7 @@ void MapRenderer::DrawBusRouteNumber(svg::Document& doc, SphereProjector& projec
 }
 
 template <typename BusIterator>
-void MapRenderer::DrawBusRouteLine(svg::Document& doc, SphereProjector& projector, const BusIterator begin, const BusIterator end) const {
+void MapRenderer::DrawBusRouteLine(svg::Document& doc,const SphereProjector& projector, const BusIterator begin, const BusIterator end) const {
     using namespace std::string_literals;
     size_t color_count = 0; // счётчик цветов
     for (auto it = begin; it!= end; ++it) {
@@ -185,7 +186,7 @@ void MapRenderer::DrawBusRouteLine(svg::Document& doc, SphereProjector& projecto
 }
 
 template <typename StopIterator>
-void MapRenderer::DrawStops(svg::Document& doc, SphereProjector& projector, const StopIterator begin, const StopIterator end) const {
+void MapRenderer::DrawStops(svg::Document& doc, const SphereProjector& projector, const StopIterator begin, const StopIterator end) const {
     using namespace std::string_literals;
     for (auto it = begin; it!= end; ++it) {
         svg::Circle stop_circle;
@@ -197,7 +198,7 @@ void MapRenderer::DrawStops(svg::Document& doc, SphereProjector& projector, cons
 }
 
 template <typename StopIterator>
-void MapRenderer::DrawStopsName(svg::Document& doc, SphereProjector& projector, const StopIterator begin, const StopIterator end) const {
+void MapRenderer::DrawStopsName(svg::Document& doc, const SphereProjector& projector, const StopIterator begin, const StopIterator end) const {
     // Все остановки расположить В АЛФАВИТНОМ ПОРЯДКЕ!!!
     using namespace std::string_literals;
 

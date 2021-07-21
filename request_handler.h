@@ -11,7 +11,7 @@ public:
     std::optional<transport::BusInformation> GetBusStat(const std::string_view& bus_name) const;
 
     // Возвращает маршруты, проходящие через
-    std::optional<transport::stopInfoStruct> GetBusesByStop(const std::string_view& stop_name) const;
+    std::optional<transport::StopInformation> GetBusesByStop(const std::string_view& stop_name) const;
 
     // Этот метод будет нужен в следующей части итогового проекта
     void RenderMap(svg::Document& doc) const;

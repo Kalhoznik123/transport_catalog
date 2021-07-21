@@ -5,7 +5,7 @@
 
 using namespace std::string_literals;
 
-namespace json {
+namespace transport {
 
 Reader::Reader( transport::Catalogue& catalogue, renderer::MapRenderer& renderer)
     :catalogue_(catalogue)
@@ -14,8 +14,8 @@ Reader::Reader( transport::Catalogue& catalogue, renderer::MapRenderer& renderer
 }
 
 void Reader::ParseJson(std::istream& input) {
-  Document json = Load(input);
-  std::map<std::string, Node> nodes = std::move(json.GetRoot().AsMap());
+  json::Document json = json::Load(input);
+  std::map<std::string, json::Node> nodes = std::move(json.GetRoot().AsMap());
   base_requests_ = std::move(nodes.at("base_requests"s).AsArray());
 
   render_settings_ = std::move(nodes.at("render_settings"s).AsMap());
@@ -35,7 +35,7 @@ void Reader::PrintJson(std::ostream& out) const {
 }
 
 void Reader::AddStops() const {
-  for (const Node& node : base_requests_) {
+  for (const json::Node& node : base_requests_) {
     const auto& node_map = node.AsMap();
     if (node_map.at("type"s).AsString() == "Stop") {
       catalogue_.AddStop({node_map.at("name"s).AsString(), {node_map.at("latitude"s).AsDouble(), node_map.at("longitude"s).AsDouble()}});
@@ -44,7 +44,7 @@ void Reader::AddStops() const {
 }
 
 void Reader::AddDistances() const {
-  for (const Node& node : base_requests_) {
+  for (const json::Node& node : base_requests_) {
 
     const auto& node_map = node.AsMap();
 
@@ -52,7 +52,7 @@ void Reader::AddDistances() const {
 
       auto map_distances = node_map.at("road_distances"s).AsMap();
       std::string from = std::move(node_map.at("name"s).AsString());
-      for (const auto& [to,distance] : map_distances) {
+      for (auto& [to,distance] : map_distances) {
         catalogue_.SetDistanceBeetweenStops(std::move(from),std::move(to),std::move(distance.AsDouble()));
       }
     }
@@ -60,9 +60,9 @@ void Reader::AddDistances() const {
 }
 
 void Reader::AddBuses() const {
-  for (const Node& node : base_requests_) {
+  for (const json::Node& node : base_requests_) {
 
-    auto node_map = std::move(node.AsMap());
+   const  auto node_map = std::move(node.AsMap());
 
 
     transport::Bus bus;
@@ -71,7 +71,7 @@ void Reader::AddBuses() const {
       bus.name =node_map.at("name"s).AsString();
 
 
-      for (const Node& stop : node_map.at("stops"s).AsArray()) {
+      for (const json::Node& stop : node_map.at("stops"s).AsArray()) {
 
         bus.stops.push_back(catalogue_.GetStop(stop.AsString()));
       }
@@ -80,7 +80,7 @@ void Reader::AddBuses() const {
       bus.end_stop =  bus.stops.size()== 0 ? nullptr: bus.stops[bus.stops.size() - 1];
 
       if (!node_map.at("is_roundtrip"s).AsBool()&&bus.start_stop!=0) {
-        int size = static_cast<int>(bus.stops.size());
+       const  int size = static_cast<int>(bus.stops.size());
         for (int i = size - 2; i >= 0; --i ) {
           bus.stops.push_back(bus.stops[i]);
         }
@@ -90,18 +90,18 @@ void Reader::AddBuses() const {
   }
 }
 
-Node Reader::stopStat(const Node& node) const {
-  Dict answer;
-  Array buses;
+json::Node Reader::StopStat(const json::Node& node) const {
+  json::Dict answer;
+  json::Array buses;
   std::set<std::string> buses_set;
 
   RequestHandler handler(catalogue_,renderer_);
 
-  std::optional<transport::stopInfoStruct> buses_ptr = handler.GetBusesByStop(std::move(node.AsMap().at("name"s).AsString()));
+  const std::optional<transport::StopInformation> buses_ptr = handler.GetBusesByStop(node.AsMap().at("name"s).AsString());
   if (!buses_ptr) {
-    answer["request_id"s] = Node(std::move(node.AsMap().at("id"s).AsInt()));
-    answer["error_message"s] = Node("not found"s);
-    return Node(answer);
+    answer["request_id"s] = json::Node(node.AsMap().at("id"s).AsInt());
+    answer["error_message"s] = json::Node("not found"s);
+    return json::Node(answer);
   }
   for (const transport::Bus* bus_ptr : buses_ptr->buses) {
     if (bus_ptr) {
@@ -109,60 +109,60 @@ Node Reader::stopStat(const Node& node) const {
     }
   }
   for (const std::string& bus_mane : buses_set) {
-    buses.push_back(Node(bus_mane));
+    buses.push_back(json::Node(bus_mane));
   }
-  answer["buses"s] = Node(buses);
-  answer["request_id"s] = Node(std::move(node.AsMap().at("id"s).AsInt()));
-  return Node(answer);
+  answer["buses"s] = json::Node(buses);
+  answer["request_id"s] = json::Node(node.AsMap().at("id"s).AsInt());
+  return json::Node(answer);
 }
 
-Node Reader::routeStat(const Node& node) const {
-  Dict answer;
+json::Node Reader::routeStat(const json::Node& node) const {
+  json::Dict answer;
   RequestHandler handler(catalogue_,renderer_);
-  std::optional<transport::BusInformation> route_ptr = handler.GetBusStat(std::move(node.AsMap().at("name"s).AsString()));
+  const std::optional<transport::BusInformation> route_ptr = handler.GetBusStat(node.AsMap().at("name"s).AsString());
   if (!route_ptr) {
-    answer["request_id"s] = Node(std::move(node.AsMap().at("id"s).AsInt()));
-    answer["error_message"s] = Node("not found"s);
-    return Node(answer);
+    answer["request_id"s] = json::Node(node.AsMap().at("id"s).AsInt());
+    answer["error_message"s] = json::Node("not found"s);
+    return json::Node(answer);
   }
-  answer["curvature"s] = Node(route_ptr->curvature);
-  answer["route_length"s] = Node(route_ptr->route_length);
-  answer["stop_count"s] = Node(route_ptr->stops);
-  answer["unique_stop_count"s] = Node(route_ptr->unique_stops);
-  answer["request_id"s] = Node(std::move(node.AsMap().at("id"s).AsInt()));
-  return Node(answer);
+  answer["curvature"s] = json::Node(route_ptr->curvature);
+  answer["route_length"s] = json::Node(route_ptr->route_length);
+  answer["stop_count"s] = json::Node(route_ptr->stops);
+  answer["unique_stop_count"s] = json::Node(route_ptr->unique_stops);
+  answer["request_id"s] = json::Node(node.AsMap().at("id"s).AsInt());
+  return json::Node(answer);
 }
 
-Node Reader::mapStat(const Node& node) const {
-  Dict map;
+json::Node Reader::mapStat(const json::Node& node) const {
+  json::Dict map;
   svg::Document renderes_map;
   RequestHandler handler(catalogue_,renderer_);
   handler.RenderMap(renderes_map);
   std::stringstream ss;
-  {
+
     renderes_map.Render(ss);
-  }
-  map["map"s] = Node(ss.str());
-  map["request_id"s] = Node(std::move(node.AsMap().at("id"s).AsInt()));
-  return Node(map);
+
+  map["map"s] = json::Node(ss.str());
+  map["request_id"s] = json::Node(node.AsMap().at("id"s).AsInt());
+  return json::Node(map);
 }
 
-Document Reader::returnStat() const {
+json::Document Reader::returnStat() const {
   // обрабатываем каждый запрос
-  Array array;
-  for (const Node& node : stat_requests_) {
+  json::Array array;
+  for (const json::Node& node : stat_requests_) {
     const std::string& type = node.AsMap().at("type"s).AsString();
     if (type == "Map"s) {
       array.push_back(mapStat(node));
     }
     if (type == "Stop"s) {
-      array.push_back(stopStat(node));
+      array.push_back(StopStat(node));
     }
     if (type == "Bus"s) {
       array.push_back(routeStat(node));
     }
   }
-  return Document(Node(array));
+  return json::Document(json::Node(array));
 }
 
 
@@ -179,21 +179,21 @@ renderer::RenderSettings Reader::parseVisualisationSettings() const {
   return_settings.stop_label_offset ={std::move(render_settings_.at("stop_label_offset"s).AsArray().at(0).AsDouble()),std::move(render_settings_.at("stop_label_offset"s).AsArray().at(1).AsDouble())};
   return_settings.underlayer_color = ParseColor(render_settings_.at("underlayer_color"s));
   return_settings.underlayer_width = std::move(render_settings_.at("underlayer_width"s).AsDouble());
-  Array color_palette = std::move(render_settings_.at("color_palette"s).AsArray());
+  json::Array color_palette = std::move(render_settings_.at("color_palette"s).AsArray());
   return_settings.color_palette.clear();
-  for (const Node& node : color_palette) {
+  for (const json::Node& node : color_palette) {
     return_settings.color_palette.push_back(ParseColor(node));
   }
   return return_settings;
 }
 
 // возвращает цвет из узла
-svg::Color Reader::ParseColor(Node node) const {
+svg::Color Reader::ParseColor(json::Node node) const {
   if (node.IsString()) {
     return std::move(node.AsString());
   }
   else if (node.IsArray()) {
-    Array color_items = std::move(node.AsArray());
+    json::Array color_items = std::move(node.AsArray());
     if (color_items.size() == 4) {
       return svg::Rgba(std::move(color_items[0].AsInt()),
                        std::move(color_items[1].AsInt()),

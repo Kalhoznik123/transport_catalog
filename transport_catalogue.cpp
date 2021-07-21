@@ -70,8 +70,7 @@ double transport::Catalogue::GetDistanceBetweenStops(const Stop* from, const Sto
 
 transport::BusInformation transport::Catalogue::GetBusInformation(const transport::Bus* bus) const {
 
-
-    const std::vector<const Stop*>& route = bus->stops;
+  const std::vector<const Stop*>& route = bus->stops;
     std::unordered_set<const Stop*> set_temp(route.begin(), route.end());
 
     double dist = 0;
@@ -90,7 +89,7 @@ transport::BusInformation transport::Catalogue::GetBusInformation(const transpor
     return {static_cast<int>(route.size()), static_cast<int>(set_temp.size()), route_length, route_length/dist};
 }
 
-transport::stopInfoStruct transport::Catalogue::GetStopInformation(const transport::Stop* stop) const {
+transport::StopInformation transport::Catalogue::GetStopInformation(const transport::Stop* stop) const {
     std::unordered_set<const Bus*> buses;
 
 
