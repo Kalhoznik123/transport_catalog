@@ -6,11 +6,6 @@
 #include "transport_catalogue.h"
 #include "map_renderer.h"
 
-/*
- * Здесь можно разместить код наполнения транспортного справочника данными из JSON,
- * а также код обработки запросов к базе и формирование массива ответов в формате JSON
- */
-
 namespace transport {
 
 class Reader {
@@ -18,14 +13,14 @@ public:
     explicit Reader(transport::Catalogue& catalogue, renderer::MapRenderer& renderer);
 
     // парсит текст из потоков в JSON
-    void ParseJson(std::istream& in);
+    void FillCatalog(std::istream& in);
 
-    void PrintJson(std::ostream& out) const;
+    void PrintRequests(std::ostream& out) const;
 
-    svg::Color ParseColor(json::Node node) const;
+  static  svg::Color ParseColor(json::Node node) ;
 private:
 
-    renderer::RenderSettings parseVisualisationSettings() const;
+    renderer::RenderSettings ParseVisualisationSettings() const;
     // добавляет в базу остановки
     void AddStops() const;
 
@@ -37,9 +32,9 @@ private:
 
     json::Node StopStat(const json::Node& node) const;
 
-    json::Node routeStat(const json::Node& node) const;
+    json::Node RouteStat(const json::Node& node) const;
 
-    json::Node mapStat(const json::Node& node) const;
+    json::Node MapStat(const json::Node& node) const;
 
     json::Document returnStat() const;
 

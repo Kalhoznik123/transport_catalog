@@ -1,11 +1,8 @@
 #include "map_renderer.h"
 
-/*
- * В этом файле вы можете разместить код, отвечающий за визуализацию карты маршрутов в формате SVG.
- * Визуализация маршртутов вам понадобится во второй части итогового проекта.
- * Пока можете оставить файл пустым.
- */
 using namespace std::string_literals;
+namespace transport {
+
 
 namespace renderer {
 
@@ -79,3 +76,4 @@ svg::Text MapRenderer::MakeStopNameTitle(const std::string &name, const svg::Poi
 
 }
 
+}

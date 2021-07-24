@@ -52,7 +52,7 @@ void Polyline::RenderObject(const RenderContext& context) const {
         }
     }
     out << "\"";
-    RenderAttrs(context.out);
+    RenderAttrs(out);
     out << " />"sv;
 }
 
@@ -138,24 +138,17 @@ void OutRgb::operator()(std::string str) const {
 
 void OutRgb::operator()(Rgb rgb) const {
     using namespace std::string_view_literals;
-    out << "rgb("sv << std::to_string(rgb.red)
-        << ","sv << std::to_string(rgb.green)
-        << ","sv << std::to_string(rgb.blue)
+    out << "rgb("sv << static_cast<int>(rgb.red)
+        << ","sv << static_cast<int>(rgb.green)
+        << ","sv << static_cast<int>(rgb.blue)
         << ")"sv;
 }
 
 void OutRgb::operator()(Rgba rgba) const {
     using namespace std::string_view_literals;
-//    std::string str = std::to_string(rgba.opacity);
-//    std::string opacity;
-//    for (int i = 0; i<3; ++i) {
-//        if (i<static_cast<int>(str.size())) {
-//            opacity += str[i];
-//        }
-//    }
-    out << "rgba("sv << std::to_string(rgba.red)
-        << ","sv << std::to_string(rgba.green)
-        << ","sv << std::to_string(rgba.blue)
+    out << "rgba("sv << static_cast<int>(rgba.red)
+        << ","sv << static_cast<int>(rgba.green)
+        << ","sv << static_cast<int>(rgba.blue)
         << ","sv << rgba.opacity
         << ")"sv;
 }

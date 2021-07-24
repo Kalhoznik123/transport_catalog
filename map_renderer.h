@@ -7,16 +7,13 @@
 #include "geo.h"
 #include "domain.h"
 
+namespace transport {
 
-
-/*
- * В этом файле вы можете разместить код, отвечающий за визуализацию карты маршрутов в формате SVG.
- * Визуализация маршртутов вам понадобится во второй части итогового проекта.
- * Пока можете оставить файл пустым.
- */
 
 namespace renderer {
+
 using namespace std::string_literals;
+
 struct RenderSettings {
     double width = 1200.0;
     double height = 1200.0;
@@ -131,9 +128,13 @@ public:
     svg::Text MakeStopNameTitle(const std::string& name, const svg::Point& position)const;
 
 
+
+
 };
 template <typename StopsContainer, typename BusesContainer, typename PointsContainer>
 void MapRenderer::Render(svg::Document& doc, const StopsContainer& stops, const BusesContainer& buses, const PointsContainer& points) const {
+
+
   SphereProjector projector(points.begin(), points.end(), settings_.width, settings_.height, settings_.padding);
   DrawBusRouteLine(doc,projector,buses.begin(),buses.end());
   DrawBusRouteNumber(doc,projector,buses.begin(),buses.end());
@@ -214,3 +215,4 @@ void MapRenderer::DrawStopsName(svg::Document& doc, const SphereProjector& proje
 
 
 } // namespace renderer
+}

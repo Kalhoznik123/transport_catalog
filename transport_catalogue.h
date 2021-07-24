@@ -17,14 +17,7 @@
 namespace transport {
 
 
-template <typename DomainPtr>
-void SortByName(std::deque<DomainPtr>& container) {
-    sort(container.begin(), container.end(),
-            [](const DomainPtr& lhs, const DomainPtr& rhs) {
-                return lhs->name < rhs->name;
-            }
-    );
-}
+
 
 
 class Catalogue {
@@ -50,11 +43,11 @@ public:
   // поиск остановки по имени
   const Stop* GetStop(const std::string_view& name) const;
 
-  std::deque<const transport::Stop*> GetAllStopsSortedByName() const;
+  std::vector<const transport::Stop*> GetAllStopsSortedByName() const;
 
   std::vector<geo::Coordinates> GetAllPoints() const;
 
-  std::deque<const transport::Bus*> GetAllBusesSortedByName() const;
+  std::vector<const transport::Bus*> GetAllBusesSortedByName() const;
 
 private:
   struct StopsPairHasher {

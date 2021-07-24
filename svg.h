@@ -153,12 +153,6 @@ protected:
 };
 
 // интерфейс Drawable
-class Drawable {
-public:
-    virtual void Draw(ObjectContainer& container) const = 0;
-
-    virtual ~Drawable() = default;
-};
 
 /*
  * Класс Circle моделирует элемент <circle> для отображения круга
@@ -233,7 +227,7 @@ public:
     }
 
     // Добавляет в svg-документ объект-наследник svg::Object
-    virtual void AddPtr(std::unique_ptr<Object>&& obj) override;
+    void AddPtr(std::unique_ptr<Object>&& obj) override;
 
     // Выводит в ostream svg-представление документа
     void Render(std::ostream& out) const;

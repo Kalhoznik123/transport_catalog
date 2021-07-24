@@ -1,6 +1,3 @@
-// напишите решение с нуля
-// код сохраните в свой git-репозиторий
-
 
 #include "transport_catalogue.h"
 #include "json_reader.h"
@@ -8,9 +5,9 @@
 
 int main() {
 
-    renderer::MapRenderer renderer;
-    transport::Catalogue catalogue;
-    transport::Reader reader(catalogue, renderer);
-    reader.ParseJson(std::cin);
-    reader.PrintJson(std::cout);
+  transport::renderer::MapRenderer renderer;
+  transport::Catalogue catalogue;
+  transport::Reader reader(catalogue, renderer);
+  reader.FillCatalog(std::cin);
+  reader.PrintRequests(std::cout);
 }

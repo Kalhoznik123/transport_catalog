@@ -1,6 +1,8 @@
 #include "request_handler.h"
+namespace transport {
 
-RequestHandler::RequestHandler(const transport::Catalogue& db, const renderer::MapRenderer& renderer) : db_(db), renderer_(renderer) {
+
+RequestHandler::RequestHandler(const transport::Catalogue& db, const transport::renderer::MapRenderer& renderer) : db_(db), renderer_(renderer) {
 
 }
 
@@ -29,4 +31,5 @@ std::optional<transport::StopInformation> RequestHandler::GetBusesByStop(const s
 void RequestHandler::RenderMap(svg::Document& doc) const {
 
     renderer_.Render(doc,db_.GetAllStopsSortedByName(),db_.GetAllBusesSortedByName(),db_.GetAllPoints());
+}
 }
