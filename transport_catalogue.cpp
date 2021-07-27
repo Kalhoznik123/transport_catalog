@@ -70,7 +70,7 @@ void transport::Catalogue::SetDistanceBeetweenStops(const std::string_view& from
 }
 
 double transport::Catalogue::GetDistanceBetweenStops(const Stop* from, const Stop* to) const {
-  auto find_from_to_item = stop_pair_to_distance_.find({from, to});
+ const  auto find_from_to_item = stop_pair_to_distance_.find({from, to});
 
   if(find_from_to_item != stop_pair_to_distance_.end()){
     return find_from_to_item->second;

@@ -148,11 +148,9 @@ public:
     virtual void AddPtr(std::unique_ptr<Object>&& obj) = 0;
 
     virtual ~ObjectContainer() = default;
-protected:
-    std::vector<std::unique_ptr<Object>> objects_;
+
 };
 
-// интерфейс Drawable
 
 /*
  * Класс Circle моделирует элемент <circle> для отображения круга
@@ -222,16 +220,14 @@ private:
 
 class Document final : public ObjectContainer {
 public:
-    ~Document() {
-
-    }
 
     // Добавляет в svg-документ объект-наследник svg::Object
     void AddPtr(std::unique_ptr<Object>&& obj) override;
 
     // Выводит в ostream svg-представление документа
     void Render(std::ostream& out) const;
-
+protected:
+    std::vector<std::unique_ptr<Object>> objects_;
 };
 
 template <typename Owner>
@@ -299,7 +295,10 @@ Owner& PathProps<Owner>::AsOwner() {
 
 template <typename Obj>
 void ObjectContainer::Add(Obj obj) {
-    objects_.emplace_back(std::make_unique<Obj>(std::move(obj)));
+
+  AddPtr(std::make_unique<Obj>(std::move(obj)));
+
+
 }
 
 }  // namespace svg

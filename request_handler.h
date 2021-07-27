@@ -1,7 +1,7 @@
 #pragma once
+#include <optional>
 #include "transport_catalogue.h"
 #include "map_renderer.h"
-
 
 namespace transport {
 
@@ -10,7 +10,7 @@ namespace transport {
 class RequestHandler {
 public:
   // MapRenderer понадобится в следующей части итогового проекта
-  RequestHandler(const transport::Catalogue& db,const transport::renderer::MapRenderer& renderer);
+  RequestHandler(const transport::Catalogue& db,const renderer::MapRenderer& renderer);
 
   // Возвращает информацию о маршруте (запрос Bus)
   std::optional<transport::BusInformation> GetBusStat(const std::string_view& bus_name) const;
@@ -24,6 +24,6 @@ public:
 private:
   // RequestHandler использует агрегацию объектов "Транспортный Справочник" и "Визуализатор Карты"
   const transport::Catalogue& db_;
-  const transport::renderer::MapRenderer& renderer_;
+  const renderer::MapRenderer& renderer_;
 };
 }

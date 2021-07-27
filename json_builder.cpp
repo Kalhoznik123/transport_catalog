@@ -21,8 +21,7 @@ json::Node json::Builder::Build() {
   return root_;
 }
 
-json::Builder::Builder(){
-  nodes_stack_.push_back(&root_);
+json::Builder::Builder():nodes_stack_(1,&root_){
 
 }
 
@@ -40,20 +39,22 @@ json::KeyValueContext json::Builder::Key(std::string key) {
 
 json::Builder &json::Builder::Value(json::Node::Value value){
 
-  auto back_item = nodes_stack_.back();
+  const  auto back_item = nodes_stack_.back();
 
   if(back_item->IsNull()){
 
     back_item->GetValue() = std::move(value);
 
   }else if(back_item->IsArray()){
-    Array & arr = std::get<Array>(back_item->GetValue());
-    arr.push_back(std::visit(NodeGetter{},std::move(value)));
+    Array& arr = std::get<Array>(back_item->GetValue());
+
+     arr.push_back(std::visit(NodeGetter{},std::move(value)));
   }else if(back_item->IsDict()){
     if (!key_) {
       throw std::logic_error("Попытка добавить элемент в словарь без ключа."s);
     }
     Dict & dict = std::get<Dict>(back_item->GetValue());
+
     dict.emplace(*key_, std::visit(NodeGetter{},std::move(value)));
     key_ = std::nullopt;
   }else{
@@ -68,7 +69,7 @@ json::DictItemContext json::Builder::StartDict() {
     throw std::logic_error("Вызов любого метода, кроме Build, при готовом объекте."s);
   }
 
-  auto back_element = nodes_stack_.back();
+  const auto back_element = nodes_stack_.back();
   if (back_element->IsNull()) {
     *back_element = Dict();
     nodes_stack_.push_back(nodes_stack_.back());
@@ -96,7 +97,7 @@ json::ArrayItemContext json::Builder::StartArray() {
     throw std::logic_error("Вызов любого метода, кроме Build, при готовом объекте."s);
   }
 
-  auto back_element = nodes_stack_.back();
+  const auto back_element = nodes_stack_.back();
   if (back_element->IsNull()) {
     *back_element = Array();
     nodes_stack_.push_back(nodes_stack_.back());

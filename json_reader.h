@@ -3,22 +3,23 @@
 #include <iostream>
 #include "request_handler.h"
 #include "json.h"
-#include "transport_catalogue.h"
-#include "map_renderer.h"
 
 namespace transport {
+
+class Catalogue;
+class MapRenderer;
 
 class Reader {
 public:
   explicit Reader(transport::Catalogue& catalogue, renderer::MapRenderer& renderer);
 
   // парсит текст из потоков в JSON
-  void FillCatalog(std::istream& in);
+  void ParseRequests(std::istream& in);
 
-  void PrintRequests(std::ostream& out) const;
+  void PrintReply(std::ostream& out) const;
 
-  static  svg::Color ParseColor(json::Node node) ;
 private:
+  static  svg::Color ParseColor(json::Node node) ;
 
   renderer::RenderSettings ParseVisualisationSettings() const;
   // добавляет в базу остановки

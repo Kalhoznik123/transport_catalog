@@ -5,9 +5,12 @@
 
 int main() {
 
+
+
   transport::renderer::MapRenderer renderer;
   transport::Catalogue catalogue;
   transport::Reader reader(catalogue, renderer);
-  reader.FillCatalog(std::cin);
-  reader.PrintRequests(std::cout);
+
+  reader.ParseRequests(std::cin);
+  reader.PrintReply(std::cout);
 }
