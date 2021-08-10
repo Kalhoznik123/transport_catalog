@@ -6,12 +6,21 @@
 
 namespace transport {
 
+namespace detail {
+
+
+struct EdgeInfoGetter {
+  json::Node operator()(const router::WaitEdgeInfo& edge_info);
+  json::Node operator()(const router::BusEdgeInfo& edge_info);
+};
+
+}
 class Catalogue;
 class MapRenderer;
 
 class Reader {
 public:
-  explicit Reader(transport::Catalogue& catalogue, renderer::MapRenderer& renderer);
+  explicit Reader(transport::Catalogue& catalogue, renderer::MapRenderer& renderer, router::TransportRouter& router);
 
   // парсит текст из потоков в JSON
   void ParseRequests(std::istream& in);
@@ -33,18 +42,26 @@ private:
 
   json::Node StopStat(const json::Node& node) const;
 
-  json::Node RouteStat(const json::Node& node) const;
+  json::Node BusStat(const json::Node& node) const;
 
   json::Node MapStat(const json::Node& node) const;
 
-  json::Document returnStat() const;
+  json::Node RouteStat(const json::Node& node) const;
+
+  json::Document ReturnStat() const;
+
+  router::RoutingSettings ParseRoutingSettings();
 
 
+private:
   transport::Catalogue& catalogue_;
   renderer::MapRenderer& renderer_;
+  router::TransportRouter& router_;
+
   json::Array base_requests_;
   json::Array stat_requests_;
   json::Dict render_settings_;
+  json::Dict route_settings_;
 };
 
 } // namespace json

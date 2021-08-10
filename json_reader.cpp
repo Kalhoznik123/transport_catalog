@@ -8,9 +8,10 @@ using namespace std::string_literals;
 using namespace json;
 namespace transport {
 
-Reader::Reader( transport::Catalogue& catalogue, renderer::MapRenderer& renderer)
-    :catalogue_(catalogue)
-    ,renderer_(renderer) {
+Reader::Reader( transport::Catalogue& catalogue, renderer::MapRenderer& renderer, router::TransportRouter& router)
+    : catalogue_(catalogue)
+    , renderer_(renderer)
+    , router_(router){
 
 }
 
@@ -23,16 +24,22 @@ void Reader::ParseRequests(std::istream& input) {
 
   stat_requests_ = std::move(nodes.at("stat_requests"s).AsArray());
 
+  route_settings_ = std::move(nodes.at("routing_settings").AsDict());
+
   AddStops();
   AddDistances();
   AddBuses();
 
   renderer_.setVisualisationSettings(ParseVisualisationSettings());
+
+  router_.SetRoutingSettings(ParseRoutingSettings());
+
+
 }
 
 void Reader::PrintReply(std::ostream& out) const {
 
-  Print(returnStat(), out);
+  Print(ReturnStat(), out);
 }
 
 void Reader::AddStops() const {
@@ -80,7 +87,7 @@ void Reader::AddBuses() const {
 
       bus.start_stop =  bus.stops.size()== 0 ? nullptr: bus.stops[0];
       bus.end_stop =  bus.stops.size()== 0 ? nullptr: bus.stops[bus.stops.size() - 1];
-
+      bus.is_roundtrip = node_map.at("is_roundtrip"s).AsBool();
       if (!node_map.at("is_roundtrip"s).AsBool()&&bus.start_stop!=nullptr) {
         const  int size = static_cast<int>(bus.stops.size());
         for (int i = size - 2; i >= 0; --i ) {
@@ -96,7 +103,7 @@ json::Node Reader::StopStat(const Node& node) const {
   Array buses;
   std::set<std::string> buses_set;
   Node answer;
-  RequestHandler handler(catalogue_,renderer_);
+  RequestHandler handler(catalogue_,renderer_,router_);
 
   const std::optional<transport::StopInformation> buses_ptr = handler.GetBusesByStop(node.AsDict().at("name"s).AsString());
   if (!buses_ptr) {
@@ -123,9 +130,9 @@ json::Node Reader::StopStat(const Node& node) const {
 
 }
 
-json::Node Reader::RouteStat(const json::Node& node) const {
+json::Node Reader::BusStat(const json::Node& node) const {
   json::Node answer;
-  RequestHandler handler(catalogue_,renderer_);
+  RequestHandler handler(catalogue_,renderer_,router_);
   const std::optional<transport::BusInformation> route_ptr = handler.GetBusStat(node.AsDict().at("name"s).AsString());
   if (!route_ptr) {
     answer = Builder{}.StartDict().Key("request_id"s).Value(node.AsDict().at("id"s).AsInt())
@@ -151,7 +158,7 @@ json::Node Reader::MapStat(const json::Node& node) const {
 
   json::Node new_answer;
   svg::Document renderes_map;
-  RequestHandler handler(catalogue_,renderer_);
+  RequestHandler handler(catalogue_,renderer_,router_);
   handler.RenderMap(renderes_map);
   std::stringstream ss;
 
@@ -160,10 +167,42 @@ json::Node Reader::MapStat(const json::Node& node) const {
   return json::Builder{}.StartDict()
                         .Key("map"s).Value(ss.str())
                         .Key("request_id"s).Value(node.AsDict().at("id"s).AsInt())
-                        .EndDict().Build();
+      .EndDict().Build();
 }
 
-json::Document Reader::returnStat() const {
+Node Reader::RouteStat(const Node &node) const
+{
+
+
+  const auto request = node.AsDict();
+
+  RequestHandler handler(catalogue_,renderer_,router_);
+
+  const std::optional<router::RouteInfo> route_info = handler.GetRouteInfo(request.at("from").AsString(),request.at("to").AsString());
+  if(!route_info){
+    return Builder{}.StartDict()
+        .Key("request_id"s).Value(request.at("id"s).AsInt())
+        .Key("error_message"s).Value("not found"s)
+        .EndDict()
+        .Build();
+  }
+
+  Array items;
+  for (const auto& item : route_info->edges) {
+    items.emplace_back(std::visit(detail::EdgeInfoGetter{}, item));
+  }
+
+  return Builder{}.StartDict()
+      .Key("request_id"s).Value(request.at("id"s).AsInt())
+      .Key("total_time"s).Value(route_info->total_time)
+      .Key("items"s).Value(items)
+      .EndDict()
+      .Build();
+
+
+}
+
+json::Document Reader::ReturnStat() const {
   // обрабатываем каждый запрос
   Array array;
   Node result;
@@ -181,11 +220,25 @@ json::Document Reader::returnStat() const {
 
     }
     if (type == "Bus"s) {
-      json.Value(RouteStat(node).AsDict());
+      json.Value(BusStat(node).AsDict());
 
     }
+    if(type == "Route"s){
+      json.Value(RouteStat(node).AsDict());
+    }
+
   }
   return json::Document(json.EndArray().Build());
+}
+
+router::RoutingSettings Reader::ParseRoutingSettings(){
+  using namespace router;
+
+  RoutingSettings result;
+  result.bus_wait_time = route_settings_.at("bus_wait_time").AsInt();
+  result.bus_velocity = route_settings_.at("bus_velocity").AsDouble();
+
+  return result;
 }
 
 
@@ -208,7 +261,7 @@ renderer::RenderSettings Reader::ParseVisualisationSettings() const {
   }
   return_settings.underlayer_color = ParseColor(render_settings_.at("underlayer_color"s));
   return_settings.underlayer_width = std::move(render_settings_.at("underlayer_width"s).AsDouble());
-  Array color_palette = std::move(render_settings_.at("color_palette"s).AsArray());
+  const Array color_palette = std::move(render_settings_.at("color_palette"s).AsArray());
   return_settings.color_palette.clear();
   for (const Node& node : color_palette) {
     return_settings.color_palette.push_back(ParseColor(node));
@@ -238,6 +291,30 @@ renderer::RenderSettings Reader::ParseVisualisationSettings() const {
   else {
     return svg::NoneColor;
   }
-}
+ }
+ namespace detail {
 
-} // namespace json
+
+ Node EdgeInfoGetter::operator()(const router::WaitEdgeInfo &edge_info) {
+   using namespace std::literals;
+   return json::Builder{}.StartDict()
+       .Key("type"s).Value("Wait"s)
+       .Key("stop_name"s).Value(std::string(edge_info.stop_name))
+       .Key("time").Value(edge_info.time)
+       .EndDict()
+       .Build();
+ }
+
+ Node EdgeInfoGetter::operator()(const router::BusEdgeInfo &edge_info) {
+   using namespace std::literals;
+   return json::Builder{}.StartDict()
+       .Key("type"s).Value("Bus"s)
+       .Key("bus"s).Value(std::string(edge_info.bus_name))
+       .Key("span_count"s).Value(static_cast<int>(edge_info.span_count))
+       .Key("time").Value(edge_info.time)
+       .EndDict()
+       .Build();
+ }
+ }
+
+ } // namespace json

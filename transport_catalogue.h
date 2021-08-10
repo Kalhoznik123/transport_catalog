@@ -36,7 +36,7 @@ public:
   void SetDistanceBeetweenStops(const std::string_view& from, const std::string_view& to, double distance);
 
   // поиск маршрута по имени
-  const Bus* GetBus(const std::string_view& num) const;
+  const Bus* GetBus (const std::string_view& num) const;
 
   // поиск остановки по имени
   const Stop* GetStop(const std::string_view& name) const;
@@ -47,6 +47,11 @@ public:
 
   std::vector<const transport::Bus*> GetAllBusesSortedByName() const;
 
+  const std::deque<Stop>& GetStops()const;
+
+  const std::deque<Bus>& GetBuses() const;
+
+   double GetDistanceBetweenStops(const Stop* from, const Stop* to) const;
 private:
   struct StopsPairHasher {
     size_t operator()(const std::pair<const transport::Stop*, const transport::Stop*>& pair) const;
@@ -54,7 +59,6 @@ private:
         std::hash<const void*> h1;
     };
     // получить расстояние между остановками
-    double GetDistanceBetweenStops(const Stop* from, const Stop* to) const;
 
     std::unordered_map<std::string, const Stop*, std::hash<std::string>> name_to_stop_;
     std::unordered_map<std::string, const Bus*, std::hash<std::string>> name_to_bus;

@@ -2,7 +2,7 @@
 #include <optional>
 #include "transport_catalogue.h"
 #include "map_renderer.h"
-
+#include "transport_router.h"
 namespace transport {
 
 
@@ -10,7 +10,7 @@ namespace transport {
 class RequestHandler {
 public:
   // MapRenderer понадобится в следующей части итогового проекта
-  RequestHandler(const transport::Catalogue& db,const renderer::MapRenderer& renderer);
+  RequestHandler(const transport::Catalogue& db,const renderer::MapRenderer& renderer, const router::TransportRouter& router);
 
   // Возвращает информацию о маршруте (запрос Bus)
   std::optional<transport::BusInformation> GetBusStat(const std::string_view& bus_name) const;
@@ -21,9 +21,13 @@ public:
   // Этот метод будет нужен в следующей части итогового проекта
   void RenderMap(svg::Document& doc) const;
 
+  std::optional<router::RouteInfo> GetRouteInfo(const std::string from, const std::string to) const;
+
 private:
   // RequestHandler использует агрегацию объектов "Транспортный Справочник" и "Визуализатор Карты"
   const transport::Catalogue& db_;
   const renderer::MapRenderer& renderer_;
+  const router::TransportRouter& router_;
+
 };
 }

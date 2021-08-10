@@ -13,7 +13,6 @@ class KeyValueContext;
 using namespace std::string_literals;
 
 
-
 class Builder{
 
 private:

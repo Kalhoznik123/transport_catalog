@@ -147,5 +147,13 @@ std::vector<const transport::Bus*> transport::Catalogue::GetAllBusesSortedByName
   return buses;
 }
 
+const std::deque<transport::Stop> &transport::Catalogue::GetStops() const{
+  return stops_;
+}
+
+const std::deque<transport::Bus> &transport::Catalogue::GetBuses() const{
+  return  buses_;
+}
+
 
 

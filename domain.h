@@ -16,7 +16,7 @@ struct Bus {
     std::vector<const Stop*> stops;
     const Stop* start_stop;
     const Stop* end_stop;
-
+    bool is_roundtrip = false;
     bool operator<(const Bus& rhs) const;
 };
 
@@ -26,6 +26,10 @@ struct BusInformation {
     double route_length = 0;
     double curvature = 0;
 };
+
+
+
+
 
 struct StopInformation {
 
