@@ -109,7 +109,27 @@ void Text::RenderObject(const RenderContext& context) const {
     }
 
     out << "\">"sv;
-    out << data_;
+   // out << data_;
+
+    for(const char ch : data_){
+      switch (ch) {
+      case '\'':
+        out << "&apos;";
+        break;
+      case '<':
+        out << "&lt;";
+        break;
+      case '>':
+        out << "&gt;";
+        break;
+      case '&':
+        out << "&amp;";
+        break;
+      default:
+        out << ch;
+        break;
+      }
+    }
     out << "</text>"sv;
 }
 
