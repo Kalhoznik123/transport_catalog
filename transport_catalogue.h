@@ -3,14 +3,11 @@
 #pragma once
 #include <string>
 #include <vector>
-#include <list>
 #include <deque>
 #include <unordered_map>
 #include <unordered_set>
-#include <map>
 #include <functional>
 #include <set>
-#include <iostream>
 #include <string_view>
 #include "geo.h"
 #include "domain.h"

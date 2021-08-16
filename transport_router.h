@@ -3,6 +3,8 @@
 #include "graph.h"
 #include "router.h"
 #include "domain.h"
+#include <optional>
+#include <vector>
 #include <memory>
 #include <variant>
 #include <unordered_map>
@@ -49,22 +51,21 @@ public:
       :settings_(std::move(settings)){
 
   }
-  TransportRouter(graph::DirectedWeightedGraph<Minutes> graf)
-      :graf_(std::move(graf)){
+//  TransportRouter(graph::DirectedWeightedGraph<Minutes> graf)
+//      :graf_(std::move(graf)){
 
-  }
-  TransportRouter(graph::DirectedWeightedGraph<Minutes> graf, RoutingSettings settings)
-      : settings_(std::move(settings))
-        , graf_(std::move(graf)){
+//  }
+//  TransportRouter(graph::DirectedWeightedGraph<Minutes> graf, RoutingSettings settings)
+//      : settings_(std::move(settings))
+//        , graf_(std::move(graf)){
 
-  }
+//  }
 
   void SetRoutingSettings(RoutingSettings settings);
-  void SetGraf(graph::DirectedWeightedGraph<Minutes> graf){
-    graf_ = std::move(graf);
-  }
 
-  void BuildRouter(const Catalogue& transport_catalogue);
+  void SetGraf(graph::DirectedWeightedGraph<Minutes> graf);
+
+  bool BuildRouter(const Catalogue& transport_catalogue);
 
   std::optional<StopPairVertexId> GetPairVertexId(const transport::Stop* stop) const;
 
@@ -76,7 +77,7 @@ public:
 private:
 
   RoutingSettings settings_;
-  graph::DirectedWeightedGraph<Minutes> graf_;
+  std::unique_ptr<graph::DirectedWeightedGraph<Minutes>> graf_;
   std::unique_ptr<graph::Router<Minutes>> router_;
   std::unordered_map<const Stop*, StopPairVertexId> stop_ptr_to_pair_id_;
   std::unordered_map<graph::EdgeId, EdgeInfo> edge_id_to_type_;
@@ -87,11 +88,11 @@ private:
   void FillStopIdDictionaries(const std::deque<transport::Stop>& stops);
   void AddWaitEdges();
   void AddBusEdges(const Catalogue& transport_catalogue);
-  void ParseBusRouteOnEdges(const Catalogue& transport_catalogue, const Bus& bus);
+  void ParseBusRouteToEdges(const Catalogue& transport_catalogue, const Bus& bus);
   graph::Edge<Minutes> MakeBusEdge(const transport::Stop* from,const transport::Stop* to, const double distance) const;
 
   template<class Iter>
-  void ParseRouteRangeOnEdges(Iter first,Iter last,const Catalogue& transport_catalogue,const Bus& bus){
+  void ParseRouteRangeToEdges(Iter first,Iter last,const Catalogue& transport_catalogue,const Bus& bus){
     for (auto iter = first; iter != last; ++iter) {
       const auto from = *iter;
 
@@ -107,8 +108,8 @@ private:
         distance += transport_catalogue.GetDistanceBetweenStops(before_to, to);
         ++span_count;
 
-        graph::EdgeId id = graf_.AddEdge(MakeBusEdge(from, to, distance));
-        edge_id_to_type_[id] = BusEdgeInfo{bus.name, span_count, graf_.GetEdge(id).weight};
+        graph::EdgeId id = graf_->AddEdge(MakeBusEdge(from, to, distance));
+        edge_id_to_type_[id] = BusEdgeInfo{bus.name, span_count, graf_->GetEdge(id).weight};
       }
 
   }

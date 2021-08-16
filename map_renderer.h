@@ -1,7 +1,5 @@
 #pragma once
 #include <string>
-#include <array>
-#include <variant>
 #include <algorithm>
 #include "svg.h"
 #include "geo.h"

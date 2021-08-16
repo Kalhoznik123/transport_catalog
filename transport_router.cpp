@@ -8,10 +8,17 @@ void TransportRouter::SetRoutingSettings(RoutingSettings settings){
   settings_ = std::move(settings);
 }
 
-void TransportRouter::BuildRouter(const Catalogue &transport_catalogue){
-  FillGraph(transport_catalogue);
-  router_ = std::make_unique<graph::Router<Minutes>>(graf_);
+//void TransportRouter::SetGraf(graph::DirectedWeightedGraph<Minutes> graf){
+//  graf_ = std::move(graf);
+//}
 
+bool TransportRouter::BuildRouter(const Catalogue &transport_catalogue){
+
+  graf_ = std::make_unique<graph::DirectedWeightedGraph<Minutes>>(transport_catalogue.GetStops().size() * 2);
+  FillGraph(transport_catalogue);
+  router_ = std::make_unique<graph::Router<Minutes>>(*graf_);
+
+  return false;
 }
 
 std::optional<StopPairVertexId> TransportRouter::GetPairVertexId(const Stop *stop) const{
@@ -63,7 +70,7 @@ void TransportRouter::FillStopIdDictionaries(const std::deque<Stop> &stops) {
 
 void TransportRouter::AddWaitEdges() {
   for (const auto& [stop_ptr, ids] : stop_ptr_to_pair_id_) {
-    graph::EdgeId id = graf_.AddEdge(graph::Edge<Minutes>{
+    graph::EdgeId id = graf_->AddEdge(graph::Edge<Minutes>{
         ids.bus_wait_begin, ids.bus_wait_end, settings_.bus_wait_time});
     edge_id_to_type_[id] = WaitEdgeInfo{stop_ptr->name, settings_.bus_wait_time};
   }
@@ -73,23 +80,23 @@ void TransportRouter::AddBusEdges(const Catalogue &transport_catalogue) {
   using namespace graph;
 
   for (const auto& bus : transport_catalogue.GetBuses()) {
-    ParseBusRouteOnEdges(transport_catalogue, bus);
+    ParseBusRouteToEdges(transport_catalogue, bus);
   }
 }
 
-void TransportRouter::ParseBusRouteOnEdges(const Catalogue &transport_catalogue, const Bus &bus) {
+void TransportRouter::ParseBusRouteToEdges(const Catalogue &transport_catalogue, const Bus &bus) {
 
   //добавляем как ребра дистанции от начала маршрута до каждой остановки.
 
   if(!bus.is_roundtrip){
     const auto end_it = std::next(bus.stops.begin(),bus.stops.size()/2);
 
-    ParseRouteRangeOnEdges(bus.stops.begin(),end_it,transport_catalogue,bus);
+    ParseRouteRangeToEdges(bus.stops.begin(),end_it,transport_catalogue,bus);
 
-    ParseRouteRangeOnEdges(end_it,bus.stops.end(),transport_catalogue,bus);
+    ParseRouteRangeToEdges(end_it,bus.stops.end(),transport_catalogue,bus);
 
   }else{
-    ParseRouteRangeOnEdges(bus.stops.begin(),bus.stops.end(),transport_catalogue,bus);
+    ParseRouteRangeToEdges(bus.stops.begin(),bus.stops.end(),transport_catalogue,bus);
   }
 
 }
