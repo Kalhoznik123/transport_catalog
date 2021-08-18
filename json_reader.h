@@ -1,20 +1,13 @@
 #pragma once
 
 #include <iostream>
-#include "request_handler.h"
+#include "transport_router.h"
+#include "map_renderer.h"
 #include "json.h"
 
 namespace transport {
 
-namespace detail {
 
-
-struct EdgeInfoGetter {
-  json::Node operator()(const router::WaitEdgeInfo& edge_info);
-  json::Node operator()(const router::BusEdgeInfo& edge_info);
-};
-
-}
 class Catalogue;
 class MapRenderer;
 

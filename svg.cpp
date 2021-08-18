@@ -1,5 +1,4 @@
 #include "svg.h"
-#include <iomanip>
 
 namespace svg {
 
@@ -109,7 +108,6 @@ void Text::RenderObject(const RenderContext& context) const {
     }
 
     out << "\">"sv;
-   // out << data_;
 
     for(const char ch : data_){
       switch (ch) {

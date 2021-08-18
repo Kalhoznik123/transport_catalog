@@ -1,12 +1,25 @@
 #include "json_reader.h"
 #include "json_builder.h"
+#include "request_handler.h"
 #include <stdexcept>
 #include <iostream>
+#include <sstream>
 #include <set>
 
 using namespace std::string_literals;
 using namespace json;
 namespace transport {
+
+namespace detail {
+
+
+struct EdgeInfoGetter {
+  json::Node operator()(const router::WaitEdgeInfo& edge_info);
+  json::Node operator()(const router::BusEdgeInfo& edge_info);
+};
+
+}
+
 
 Reader::Reader( transport::Catalogue& catalogue, renderer::MapRenderer& renderer, router::TransportRouter& router)
     : catalogue_(catalogue)
@@ -189,13 +202,13 @@ Node Reader::RouteStat(const Node &node) const
 
   Array items;
   for (const auto& item : route_info->edges) {
-    items.emplace_back(std::visit(detail::EdgeInfoGetter{}, item));
+    items.push_back(std::visit(detail::EdgeInfoGetter{}, item));
   }
 
   return Builder{}.StartDict()
       .Key("request_id"s).Value(request.at("id"s).AsInt())
       .Key("total_time"s).Value(route_info->total_time)
-      .Key("items"s).Value(items)
+      .Key("items"s).Value(std::move(items))
       .EndDict()
       .Build();
 
@@ -204,6 +217,7 @@ Node Reader::RouteStat(const Node &node) const
 
 json::Document Reader::ReturnStat() const {
   // обрабатываем каждый запрос
+  using namespace std::string_view_literals;
   Array array;
   Node result;
 
@@ -211,19 +225,19 @@ json::Document Reader::ReturnStat() const {
   auto json = builder.StartArray();
   for (const Node& node : stat_requests_) {
     const std::string& type = node.AsDict().at("type"s).AsString();
-    if (type == "Map"s) {
+    if (type == "Map"sv) {
       json.Value(MapStat(node).AsDict());
 
     }
-    if (type == "Stop"s) {
+    if (type == "Stop"sv) {
       json.Value(StopStat(node).AsDict());
 
     }
-    if (type == "Bus"s) {
+    if (type == "Bus"sv) {
       json.Value(BusStat(node).AsDict());
 
     }
-    if(type == "Route"s){
+    if(type == "Route"sv){
       json.Value(RouteStat(node).AsDict());
     }
 

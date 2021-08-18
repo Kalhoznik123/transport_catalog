@@ -7,8 +7,7 @@
 #include <vector>
 #include <optional>
 #include <variant>
-#include <sstream>
-#include <iomanip>
+
 
 namespace svg {
 

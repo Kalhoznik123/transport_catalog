@@ -3,8 +3,8 @@
 #include "transport_catalogue.h"
 #include "map_renderer.h"
 #include "transport_router.h"
-namespace transport {
 
+namespace transport {
 
 
 class RequestHandler {
@@ -21,7 +21,7 @@ public:
   // Этот метод будет нужен в следующей части итогового проекта
   void RenderMap(svg::Document& doc) const;
 
-  std::optional<router::RouteInfo> GetRouteInfo(const std::string from, const std::string to) const;
+  std::optional<router::RouteInfo> GetRouteInfo( std::string_view from, std::string_view to) const;
 
 private:
   // RequestHandler использует агрегацию объектов "Транспортный Справочник" и "Визуализатор Карты"

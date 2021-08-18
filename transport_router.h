@@ -4,6 +4,7 @@
 #include "router.h"
 #include "domain.h"
 #include <optional>
+#include <chrono>
 #include <vector>
 #include <memory>
 #include <variant>
@@ -12,11 +13,11 @@ namespace transport {
 
 namespace router {
 
-using Minutes = double;
+//using Minutes = double;
 
 struct RoutingSettings {
-  Minutes bus_wait_time = 0.; // min
-  double bus_velocity = 0.; // km/hour
+  int bus_wait_time = 0.;
+  double bus_velocity = 0.;
 };
 
 struct StopPairVertexId {
@@ -26,19 +27,19 @@ struct StopPairVertexId {
 
 struct WaitEdgeInfo {
   std::string_view stop_name;
-  Minutes time = 0.;
+   double time = 0.;
 };
 
 struct BusEdgeInfo {
   std::string_view bus_name;
   size_t span_count = 0;
-  Minutes time = 0.;
+    double time = 0.;
 };
 
 using EdgeInfo = std::variant<WaitEdgeInfo, BusEdgeInfo>;
 
 struct RouteInfo {
-  Minutes total_time = 0.;
+  double total_time = 0.;
   std::vector<EdgeInfo> edges;
 };
 
@@ -51,48 +52,35 @@ public:
       :settings_(std::move(settings)){
 
   }
-//  TransportRouter(graph::DirectedWeightedGraph<Minutes> graf)
-//      :graf_(std::move(graf)){
-
-//  }
-//  TransportRouter(graph::DirectedWeightedGraph<Minutes> graf, RoutingSettings settings)
-//      : settings_(std::move(settings))
-//        , graf_(std::move(graf)){
-
-//  }
 
   void SetRoutingSettings(RoutingSettings settings);
 
-  void SetGraf(graph::DirectedWeightedGraph<Minutes> graf);
+  void BuildRouter(const Catalogue& transport_catalogue);
 
-  bool BuildRouter(const Catalogue& transport_catalogue);
-
-  std::optional<StopPairVertexId> GetPairVertexId(const transport::Stop* stop) const;
-
-  std::optional<RouteInfo> GetRouteInfo(const graph::VertexId from, graph::VertexId to) const;
-
-  const EdgeInfo& GetEdgeInfo(graph::EdgeId id)const;
+  std::optional<RouteInfo> GetRouteInfo(const transport::Stop* from, const transport::Stop* to) const;
 
 
 private:
 
   RoutingSettings settings_;
-  std::unique_ptr<graph::DirectedWeightedGraph<Minutes>> graf_;
-  std::unique_ptr<graph::Router<Minutes>> router_;
+  std::unique_ptr<graph::DirectedWeightedGraph<double>> router_graf_;
+  std::unique_ptr<graph::Router<double>> router_;
   std::unordered_map<const Stop*, StopPairVertexId> stop_ptr_to_pair_id_;
   std::unordered_map<graph::EdgeId, EdgeInfo> edge_id_to_type_;
 private:
 
 
+  std::optional<StopPairVertexId> GetPairVertexId(const transport::Stop* stop) const;
+  const EdgeInfo& GetEdgeInfo(graph::EdgeId id)const;
   void FillGraph(const Catalogue& transport_catalogue);
   void FillStopIdDictionaries(const std::deque<transport::Stop>& stops);
   void AddWaitEdges();
   void AddBusEdges(const Catalogue& transport_catalogue);
   void ParseBusRouteToEdges(const Catalogue& transport_catalogue, const Bus& bus);
-  graph::Edge<Minutes> MakeBusEdge(const transport::Stop* from,const transport::Stop* to, const double distance) const;
+  graph::Edge<double> MakeBusEdge(const transport::Stop* from,const transport::Stop* to, const double distance) const;
 
-  template<class Iter>
-  void ParseRouteRangeToEdges(Iter first,Iter last,const Catalogue& transport_catalogue,const Bus& bus){
+  template<class RandomIter>
+  void MakeBusEagesFromRoute(RandomIter first,RandomIter last,const Catalogue& transport_catalogue,const Bus& bus){
     for (auto iter = first; iter != last; ++iter) {
       const auto from = *iter;
 
@@ -108,8 +96,8 @@ private:
         distance += transport_catalogue.GetDistanceBetweenStops(before_to, to);
         ++span_count;
 
-        graph::EdgeId id = graf_->AddEdge(MakeBusEdge(from, to, distance));
-        edge_id_to_type_[id] = BusEdgeInfo{bus.name, span_count, graf_->GetEdge(id).weight};
+        const  graph::EdgeId id = router_graf_->AddEdge(MakeBusEdge(from, to, distance));
+        edge_id_to_type_[id] = BusEdgeInfo{bus.name, span_count, router_graf_->GetEdge(id).weight};
       }
 
   }
