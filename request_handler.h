@@ -1,16 +1,21 @@
 #pragma once
 #include <optional>
-#include "transport_catalogue.h"
 #include "map_renderer.h"
 #include "transport_router.h"
 
 namespace transport {
 
+class Catalogue;
+struct BusInformation;
+struct StopInformation;
+
+
+
 
 class RequestHandler {
 public:
   // MapRenderer понадобится в следующей части итогового проекта
-  RequestHandler(const transport::Catalogue& db,const renderer::MapRenderer& renderer, const router::TransportRouter& router);
+  RequestHandler(const transport::Catalogue& db, const renderer::MapRenderer& renderer, const router::TransportRouter& router);
 
   // Возвращает информацию о маршруте (запрос Bus)
   std::optional<transport::BusInformation> GetBusStat(const std::string_view& bus_name) const;

@@ -85,7 +85,28 @@ enum class StrokeLineCap {
     SQUARE,
 };
 
-inline std::ostream& operator<<(std::ostream& out, StrokeLineCap line_cap);
+inline std::ostream& operator<<(std::ostream& out, StrokeLineCap line_cap) {
+  using namespace std::string_view_literals;
+  switch (line_cap) {
+  case StrokeLineCap::BUTT:
+    out << "butt"sv;
+    break;
+  case StrokeLineCap::ROUND:
+    out << "round"sv;
+    break;
+  case StrokeLineCap::SQUARE:
+    out << "square"sv;
+    break;
+  }
+  return out;
+}
+
+
+
+
+
+
+//inline std::ostream& operator<<(std::ostream& out, StrokeLineCap line_cap);
 
 enum class StrokeLineJoin {
     ARCS,
@@ -95,8 +116,29 @@ enum class StrokeLineJoin {
     ROUND,
 };
 
-inline std::ostream& operator<<(std::ostream& out, StrokeLineJoin line_join);
+//inline std::ostream& operator<<(std::ostream& out, StrokeLineJoin line_join);
 
+inline std::ostream& operator<<(std::ostream& out, StrokeLineJoin line_join) {
+  using namespace std::string_view_literals;
+  switch (line_join) {
+  case StrokeLineJoin::ARCS:
+    out << "arcs"sv;
+    break;
+  case StrokeLineJoin::BEVEL:
+    out << "bevel"sv;
+    break;
+  case StrokeLineJoin::MITER:
+    out << "miter"sv;
+    break;
+  case StrokeLineJoin::MITER_CLIP:
+    out << "miter-clip"sv;
+    break;
+  case StrokeLineJoin::ROUND:
+    out << "round"sv;
+    break;
+  }
+  return out;
+}
 template <typename Owner>
 class PathProps {
 public:
@@ -146,7 +188,7 @@ public:
     void Add(Obj obj);
     virtual void AddPtr(std::unique_ptr<Object>&& obj) = 0;
 
-    virtual ~ObjectContainer() = default;
+     ~ObjectContainer() = default;
 
 };
 

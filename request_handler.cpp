@@ -39,14 +39,9 @@ void RequestHandler::RenderMap(svg::Document& doc) const {
 
 std::optional<router::RouteInfo> RequestHandler::GetRouteInfo( std::string_view from,  std::string_view to) const{
 
-  const Stop* stop_from = db_.GetStop(from);
-  const Stop* stop_to = db_.GetStop(to);
+  const Stop* const stop_from = db_.GetStop(from);
+  const Stop* const stop_to = db_.GetStop(to);
 
-  //const auto from_id = router_.GetPairVertexId(stop_from);
-  //const auto to_id = router_.GetPairVertexId(stop_to);
-
-  //if(!from_id || !to_id)
-   // return std::nullopt;
 
   const auto route_info =router_.GetRouteInfo(stop_from,stop_to);
 

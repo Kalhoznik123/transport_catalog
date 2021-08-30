@@ -57,8 +57,8 @@ private:
     };
     // получить расстояние между остановками
 
-    std::unordered_map<std::string, const Stop*, std::hash<std::string>> name_to_stop_;
-    std::unordered_map<std::string, const Bus*, std::hash<std::string>> name_to_bus;
+    std::unordered_map<std::string_view, const Stop*, std::hash<std::string_view>> name_to_stop_;
+    std::unordered_map<std::string_view, const Bus*, std::hash<std::string_view>> name_to_bus;
     std::unordered_map<const Stop*, std::set<const transport::Bus*>> stop_to_buses_;
     std::unordered_map<std::pair<const Stop*, const Stop*>, double, StopsPairHasher> stop_pair_to_distance_;
 

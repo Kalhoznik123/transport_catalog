@@ -1,15 +1,20 @@
 #pragma once
 
-#include <iostream>
-#include "transport_router.h"
-#include "map_renderer.h"
-#include "json.h"
 
+#include "json.h"
+#include "svg.h"
 namespace transport {
 
 
 class Catalogue;
+namespace renderer  {
 class MapRenderer;
+struct RenderSettings;
+}
+namespace router {
+class TransportRouter;
+struct RoutingSettings;
+}
 
 class Reader {
 public:

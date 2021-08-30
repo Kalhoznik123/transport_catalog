@@ -50,18 +50,35 @@ void transport::Catalogue::AddStop(transport::Stop stop) {
 
 
 const transport::Bus* transport::Catalogue::GetBus(const std::string_view& num) const {
-    if(name_to_bus.count(std::string(num)) == 0)
-        return  nullptr;
-    return name_to_bus.at(std::string(num));
+
+  const auto it =   name_to_bus.find(num);
+
+  if (it  == name_to_bus.end())
+    return nullptr;
+
+  return it->second;
+
+
+//  if(name_to_bus.count(std::string(num)) == 0)
+//        return  nullptr;
+//    return name_to_bus.at(std::string(num));
 }
 
 
 const transport::Stop* transport::Catalogue::GetStop(const std::string_view& name) const {
-    if (name_to_stop_.count(std::string(name)) == 0) {
-        return nullptr;
-    }
+const auto it =   name_to_stop_.find(name);
 
-    return name_to_stop_.at(std::string(name));
+if (it  == name_to_stop_.end())
+  return nullptr;
+
+return it->second;
+
+
+//if (name_to_stop_.count(std::string(name)) == 0) {
+//        return nullptr;
+//    }
+
+//    return name_to_stop_.at(std::string(name));
 }
 
 void transport::Catalogue::SetDistanceBeetweenStops(const std::string_view& from, const std::string_view& to, double distance) {

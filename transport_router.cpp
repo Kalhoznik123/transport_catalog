@@ -17,13 +17,15 @@ void TransportRouter::BuildRouter(const Catalogue &transport_catalogue){
 
 }
 
-std::optional<StopPairVertexId> TransportRouter::GetPairVertexId(const Stop *stop) const{
+std::optional<TransportRouter::StopPairVertexId> TransportRouter::GetPairVertexId(const Stop *stop) const{
   const auto it  = stop_ptr_to_pair_id_.find(stop);
 
   if(it == stop_ptr_to_pair_id_.end())
     return std::nullopt;
 
-  return  stop_ptr_to_pair_id_.at(stop);
+  return it->second;
+
+  //return  stop_ptr_to_pair_id_.at(stop);
 }
 
 const EdgeInfo &TransportRouter::GetEdgeInfo(graph::EdgeId id) const{
@@ -91,15 +93,15 @@ void TransportRouter::ParseBusRouteToEdges(const Catalogue &transport_catalogue,
   //добавляем как ребра дистанции от начала маршрута до каждой остановки.
 
   if(bus.is_roundtrip){
-    MakeBusEagesFromRoute(bus.stops.begin(),bus.stops.end(),transport_catalogue,bus);
+    FillTransportRouter(bus.stops.begin(),bus.stops.end(),transport_catalogue,bus);
 
 
   }else{
     const auto end_it = std::next(bus.stops.begin(),bus.stops.size()/2);
 
-    MakeBusEagesFromRoute(bus.stops.begin(),end_it,transport_catalogue,bus);
+    FillTransportRouter(bus.stops.begin(),end_it + 1,transport_catalogue,bus);
 
-    MakeBusEagesFromRoute(end_it,bus.stops.end(),transport_catalogue,bus);
+    FillTransportRouter(end_it,bus.stops.end(),transport_catalogue,bus);
   }
 
 }
