@@ -15,7 +15,7 @@ void SortByName(std::vector<DomainPtr>& container) {
 }
 
 
-size_t transport::Catalogue::StopsPairHasher::operator()(const std::pair<const transport::Stop*, const transport::Stop*>& pair) const {
+size_t transport::StopsPairHasher::operator()(const std::pair<const transport::Stop*, const transport::Stop*>& pair) const {
   const size_t h_1 = h1(pair.first);
    const  size_t h_2 = h1(pair.second);
     return h_2 + h_1 * 13;
@@ -98,6 +98,16 @@ double transport::Catalogue::GetDistanceBetweenStops(const Stop* from, const Sto
 
 }
 
+const std::unordered_map<std::pair<const transport::Stop *, const transport::Stop *>, double, transport::StopsPairHasher> &transport::Catalogue::GetDistancesBetweenStops() const
+{
+    return stop_pair_to_distance_;
+}
+
+const transport::Stop &transport::Catalogue::GetStopById(int id) const
+{
+    return stops_[id];
+}
+
 transport::BusInformation transport::Catalogue::GetBusInformation(const transport::Bus* bus) const {
 
   const std::vector<const Stop*>& route = bus->stops;
@@ -138,7 +148,7 @@ std::vector<const transport::Stop*> transport::Catalogue::GetAllStopsSortedByNam
     }
   }
   SortByName(stops);
-  return stops;
+ return stops;
 
 }
 

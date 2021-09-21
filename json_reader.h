@@ -3,6 +3,7 @@
 
 #include "json.h"
 #include "svg.h"
+#include "serialization.h"
 namespace transport {
 
 
@@ -18,7 +19,10 @@ struct RoutingSettings;
 
 class Reader {
 public:
-  explicit Reader(transport::Catalogue& catalogue, renderer::MapRenderer& renderer, router::TransportRouter& router);
+  explicit Reader(transport::Catalogue& catalogue,
+                  renderer::MapRenderer& renderer,
+                  /*router::TransportRouter& router,*/
+                  serialization::Serializator& serializator);
 
   // парсит текст из потоков в JSON
   void ParseRequests(std::istream& in);
@@ -29,6 +33,11 @@ private:
   static  svg::Color ParseColor(json::Node node) ;
 
   renderer::RenderSettings ParseVisualisationSettings() const;
+
+  std::string GetSerializationSettings() const;
+
+
+
   // добавляет в базу остановки
   void AddStops() const;
 
@@ -53,13 +62,15 @@ private:
 
 private:
   transport::Catalogue& catalogue_;
-  renderer::MapRenderer& renderer_;
-  router::TransportRouter& router_;
+ renderer::MapRenderer& renderer_;
+  //router::TransportRouter& router_;
+  serialization::Serializator& serializator_;
 
   json::Array base_requests_;
   json::Array stat_requests_;
   json::Dict render_settings_;
   json::Dict route_settings_;
+  json::Dict serialization_settings;
 };
 
 } // namespace json

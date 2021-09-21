@@ -14,46 +14,80 @@ namespace detail {
 
 
 struct EdgeInfoGetter {
-  json::Node operator()(const router::WaitEdgeInfo& edge_info);
-  json::Node operator()(const router::BusEdgeInfo& edge_info);
+    json::Node operator()(const router::WaitEdgeInfo& edge_info);
+    json::Node operator()(const router::BusEdgeInfo& edge_info);
 };
 
 }
 
 
-Reader::Reader( transport::Catalogue& catalogue, renderer::MapRenderer& renderer, router::TransportRouter& router)
+Reader::Reader( transport::Catalogue& catalogue, renderer::MapRenderer& renderer,
+                /*router::TransportRouter& router,*/serialization::Serializator& serializator)
     : catalogue_(catalogue)
     , renderer_(renderer)
-    , router_(router){
+    //    , router_(router)
+    , serializator_(serializator)
+{
 
 }
 
 void Reader::ParseRequests(std::istream& input) {
-  Document json = json::Load(input);
-  std::map<std::string, Node> nodes = std::move(json.GetRoot().AsDict());
-  base_requests_ = std::move(nodes.at("base_requests"s).AsArray());
+    Document json = json::Load(input);
+    std::map<std::string, Node> nodes = std::move(json.GetRoot().AsDict());
 
-  render_settings_ = std::move(nodes.at("render_settings"s).AsDict());
+    if(auto it = nodes.find("base_requests"s);it !=nodes.end() ){
 
-  stat_requests_ = std::move(nodes.at("stat_requests"s).AsArray());
+        base_requests_ = std::move(it->second.AsArray());
 
-  route_settings_ = std::move(nodes.at("routing_settings").AsDict());
+        AddStops();
+        AddDistances();
+        AddBuses();
 
-  AddStops();
-  AddDistances();
-  AddBuses();
+    }
+    if(auto it = nodes.find("render_settings"s);it !=nodes.end() ){
+        render_settings_ = std::move(it->second.AsDict());
 
-  renderer_.setVisualisationSettings(ParseVisualisationSettings());
 
-  router_.SetRoutingSettings(ParseRoutingSettings());
 
+        renderer_.setVisualisationSettings(ParseVisualisationSettings());
+
+    }
+    if(auto it = nodes.find("stat_requests"s);it !=nodes.end() ){
+        stat_requests_ = std::move(it->second.AsArray());
+
+        //stat_requests_ = std::move(nodes.at("stat_requests"s).AsArray());
+
+    }
+
+//    if(auto it = nodes.find("routing_settings"s);it !=nodes.end() ){
+//        route_settings_ = std::move(it->second.AsDict());
+//        //route_settings_ = std::move(nodes.at("routing_settings").AsDict());
+//        router_.SetRoutingSettings(ParseRoutingSettings());
+//    }
+
+    if(auto it = nodes.find("serialization_settings"s);it !=nodes.end() ){
+
+        serialization_settings = std::move(it->second.AsDict());
+        serializator_.SetPath(GetSerializationSettings());
+        //serialization_settings = std::move(nodes.at("serialization_settings").AsDict());
+
+    }
 
 }
 
 void Reader::PrintReply(std::ostream& out) const {
 
-  Print(ReturnStat(), out);
+    Print(ReturnStat(), out);
 }
+
+std::string Reader::GetSerializationSettings() const
+{
+
+    auto result = serialization_settings.at("file").AsString();
+
+    return result;
+}
+
 
 void Reader::AddStops() const {
   for (const Node& node : base_requests_) {
@@ -86,12 +120,10 @@ void Reader::AddBuses() const {
 
     const auto& node_map = node.AsDict();
 
-
     if (node_map.at("type"s).AsString() == "Bus") {
       transport::Bus bus;
 
       bus.name =node_map.at("name"s).AsString();
-
 
       for (const Node& stop : node_map.at("stops"s).AsArray()) {
 
@@ -116,7 +148,7 @@ json::Node Reader::StopStat(const Node& node) const {
   Array buses;
   std::set<std::string> buses_set;
   Node answer;
-  RequestHandler handler(catalogue_,renderer_,router_);
+  RequestHandler handler(catalogue_,renderer_/*,router_*/);
 
   const std::optional<transport::StopInformation> buses_ptr = handler.GetBusesByStop(node.AsDict().at("name"s).AsString());
   if (!buses_ptr) {
@@ -145,7 +177,7 @@ json::Node Reader::StopStat(const Node& node) const {
 
 json::Node Reader::BusStat(const json::Node& node) const {
   json::Node answer;
-  RequestHandler handler(catalogue_,renderer_,router_);
+  RequestHandler handler(catalogue_,renderer_/*,router_*/);
   const std::optional<transport::BusInformation> route_ptr = handler.GetBusStat(node.AsDict().at("name"s).AsString());
   if (!route_ptr) {
     answer = Builder{}.StartDict().Key("request_id"s).Value(node.AsDict().at("id"s).AsInt())
@@ -171,7 +203,7 @@ json::Node Reader::MapStat(const json::Node& node) const {
 
   json::Node new_answer;
   svg::Document renderes_map;
-  RequestHandler handler(catalogue_,renderer_,router_);
+  RequestHandler handler(catalogue_,renderer_/*,router_*/);
   handler.RenderMap(renderes_map);
   std::stringstream ss;
 
@@ -183,37 +215,37 @@ json::Node Reader::MapStat(const json::Node& node) const {
       .EndDict().Build();
 }
 
-Node Reader::RouteStat(const Node &node) const
-{
+//Node Reader::RouteStat(const Node &node) const
+//{
 
 
-  const auto request = node.AsDict();
+//  const auto request = node.AsDict();
 
-  RequestHandler handler(catalogue_,renderer_,router_);
+//  RequestHandler handler(catalogue_/*,renderer_,router_*/);
 
-  const std::optional<router::RouteInfo> route_info = handler.GetRouteInfo(request.at("from").AsString(),request.at("to").AsString());
-  if(!route_info){
-    return Builder{}.StartDict()
-        .Key("request_id"s).Value(request.at("id"s).AsInt())
-        .Key("error_message"s).Value("not found"s)
-        .EndDict()
-        .Build();
-  }
+//  const std::optional<router::RouteInfo> route_info = handler.GetRouteInfo(request.at("from").AsString(),request.at("to").AsString());
+//  if(!route_info){
+//    return Builder{}.StartDict()
+//        .Key("request_id"s).Value(request.at("id"s).AsInt())
+//        .Key("error_message"s).Value("not found"s)
+//        .EndDict()
+//        .Build();
+//  }
 
-  Array items;
-  for (const auto& item : route_info->edges) {
-    items.push_back(std::visit(detail::EdgeInfoGetter{}, item));
-  }
+//  Array items;
+//  for (const auto& item : route_info->edges) {
+//    items.push_back(std::visit(detail::EdgeInfoGetter{}, item));
+//  }
 
-  return Builder{}.StartDict()
-      .Key("request_id"s).Value(request.at("id"s).AsInt())
-      .Key("total_time"s).Value(route_info->total_time)
-      .Key("items"s).Value(std::move(items))
-      .EndDict()
-      .Build();
+//  return Builder{}.StartDict()
+//      .Key("request_id"s).Value(request.at("id"s).AsInt())
+//      .Key("total_time"s).Value(route_info->total_time)
+//      .Key("items"s).Value(std::move(items))
+//      .EndDict()
+//      .Build();
 
 
-}
+//}
 
 json::Document Reader::ReturnStat() const {
   // обрабатываем каждый запрос
@@ -237,9 +269,9 @@ json::Document Reader::ReturnStat() const {
       json.Value(BusStat(node).AsDict());
 
     }
-    if(type == "Route"sv){
-      json.Value(RouteStat(node).AsDict());
-    }
+//    if(type == "Route"sv){
+//      json.Value(RouteStat(node).AsDict());
+//    }
 
   }
   return json::Document(json.EndArray().Build());

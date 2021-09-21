@@ -3,10 +3,10 @@
 namespace transport {
 
 
-RequestHandler::RequestHandler(const transport::Catalogue& db, const transport::renderer::MapRenderer& renderer, const transport::router::TransportRouter& router )
+RequestHandler::RequestHandler(const transport::Catalogue& db, const transport::renderer::MapRenderer& renderer/*, const transport::router::TransportRouter& router*/ )
     : db_(db)
     , renderer_(renderer)
-    , router_(router){
+    /*, router_(router)*/{
 
 }
 
@@ -37,18 +37,38 @@ void RequestHandler::RenderMap(svg::Document& doc) const {
     renderer_.Render(doc,db_.GetAllStopsSortedByName(),db_.GetAllBusesSortedByName(),db_.GetAllPoints());
 }
 
-std::optional<router::RouteInfo> RequestHandler::GetRouteInfo( std::string_view from,  std::string_view to) const{
+//std::optional<router::RouteInfo> RequestHandler::GetRouteInfo( std::string_view from,  std::string_view to) const{
 
-  const Stop* const stop_from = db_.GetStop(from);
-  const Stop* const stop_to = db_.GetStop(to);
-
-
-  const auto route_info =router_.GetRouteInfo(stop_from,stop_to);
-
-  if(!route_info)
-    return std::nullopt;
+//  const Stop* const stop_from = db_.GetStop(from);
+//  const Stop* const stop_to = db_.GetStop(to);
 
 
-  return  route_info;
+//  const auto route_info =router_.GetRouteInfo(stop_from,stop_to);
+
+//  if(!route_info)
+//    return std::nullopt;
+
+
+//  return  route_info;
+//}
+
+const std::deque<Stop> &RequestHandler::GetStops() const {
+    return  db_.GetStops();
 }
+
+const std::deque<Bus> &RequestHandler::GetBuses() const {
+    return  db_.GetBuses();
+}
+
+const std::unordered_map<std::pair<const Stop *, const Stop *>, double, StopsPairHasher> &RequestHandler::GetDistancesBetweenStops() const
+{
+    return db_.GetDistancesBetweenStops();
+}
+
+const renderer::RenderSettings &RequestHandler::GetRendererSettings() const {
+    return renderer_.GetRenderSetting();
+}
+
+
+
 }

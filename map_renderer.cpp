@@ -7,7 +7,11 @@ namespace transport {
 namespace renderer {
 
 void MapRenderer::setVisualisationSettings(RenderSettings settings) {
-  settings_ = std::move(settings);
+    settings_ = std::move(settings);
+}
+
+const RenderSettings &MapRenderer::GetRenderSetting() const{
+    return settings_;
 }
 
 svg::Polyline MapRenderer::MakeBusRouteLine(size_t color_count) const {

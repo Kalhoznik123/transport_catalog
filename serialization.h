@@ -7,7 +7,6 @@
 #include "request_handler.h"
 #include "map_renderer.h"
 #include <unordered_map>
-#include <optional>
 #include <variant>
 namespace transport {
 
@@ -27,12 +26,13 @@ public:
 
     void DeserializeCatalog(transport::Catalogue& catalog,renderer::MapRenderer& renderer);
 
-    std::optional<renderer::RenderSettings> DeserializeRendererSettings(const proto_catalogue_serialization::TransportCatalogue& catalog);
+    renderer::RenderSettings DeserializeRendererSettings(const proto_catalogue_serialization::TransportCatalogue& catalog);
 private:
 
     std::filesystem::path file_name_;
+
     svg::Point DeserializedPoint(const proto_catalogue_serialization::Point& proto_point);
-    svg::Color DeserializeColor(proto_catalogue_serialization::Color color_);
+    svg::Color DeserializeColor(const proto_catalogue_serialization::Color& proto_color);
 
     proto_catalogue_serialization::Point MakeProtoPoint(int x,int y);
 

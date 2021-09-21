@@ -15,6 +15,14 @@
 namespace transport {
 
 
+struct StopsPairHasher {
+  size_t operator()(const std::pair<const transport::Stop*, const transport::Stop*>& pair) const;
+private:
+      std::hash<const void*> h1;
+  };
+
+
+
 class Catalogue {
 public:
 
@@ -49,13 +57,12 @@ public:
   const std::deque<Bus>& GetBuses() const;
 
    double GetDistanceBetweenStops(const Stop* from, const Stop* to) const;
+
+   const std::unordered_map<std::pair<const Stop*, const Stop*>, double, StopsPairHasher>& GetDistancesBetweenStops() const ;
+
+   const Stop& GetStopById(int id) const;
+
 private:
-  struct StopsPairHasher {
-    size_t operator()(const std::pair<const transport::Stop*, const transport::Stop*>& pair) const;
-  private:
-        std::hash<const void*> h1;
-    };
-    // получить расстояние между остановками
 
     std::unordered_map<std::string_view, const Stop*, std::hash<std::string_view>> name_to_stop_;
     std::unordered_map<std::string_view, const Bus*, std::hash<std::string_view>> name_to_bus;
