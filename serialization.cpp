@@ -59,6 +59,8 @@ settings.stop_label_offset =  DeserializedPoint(proto_render_settings.stop_label
 settings.bus_label_font_size = proto_render_settings.bus_label_font_size();
 settings.stop_label_font_size = proto_render_settings.stop_label_font_size();
 
+
+
 //int aa = proto_render_settings.color_palette_size();
 for(int i = 0; i<proto_render_settings.color_palette_size();++i){
     settings.color_palette.push_back(DeserializeColor(proto_render_settings.color_palette(i)));
