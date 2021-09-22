@@ -1,3 +1,4 @@
+#include <stdexcept>
 #include "serialization.h"
 #include <unordered_map>
 #include<fstream>
@@ -29,8 +30,10 @@ void Serializator::DeserializeCatalog(Catalogue &catalog,renderer::MapRenderer& 
 proto_catalogue_serialization::TransportCatalogue proto_catalog;
 std::ifstream in(file_name_,std::ios::binary);
 
-if(!proto_catalog.ParseFromIstream(&in))
-    return;
+proto_catalog.ParseFromIstream(&in);
+
+//if(!proto_catalog.ParseFromIstream(&in))
+//    return;
 
 DeserializeStops(catalog,proto_catalog);
 DeserializeDistance(catalog,proto_catalog);
@@ -52,75 +55,101 @@ renderer::RenderSettings Serializator::DeserializeRendererSettings(const proto_c
     settings.padding = proto_render_settings.padding();
     settings.line_width = proto_render_settings.line_width();
     settings.stop_radius = proto_render_settings.stop_radius();
-    settings.bus_label_offset = DeserializedPoint(proto_render_settings.bus_label_offset());
+    settings.bus_label_offset = DeserializePoint(proto_render_settings.bus_label_offset());
     settings.underlayer_color = DeserializeColor(proto_render_settings.underlayer_color());
     settings.underlayer_width = proto_render_settings.underlayer_width();
-    settings.stop_label_offset =  DeserializedPoint(proto_render_settings.stop_label_offset());
+    settings.stop_label_offset =  DeserializePoint(proto_render_settings.stop_label_offset());
     settings.bus_label_font_size = proto_render_settings.bus_label_font_size();
     settings.stop_label_font_size = proto_render_settings.stop_label_font_size();
 
 
-
-//int aa = proto_render_settings.color_palette_size();
 for(int i = 0; i<proto_render_settings.color_palette_size();++i){
     settings.color_palette.push_back(DeserializeColor(proto_render_settings.color_palette(i)));
-
-    //settings.color_palette[i] = DeserializeColor(proto_render_settings.color_palette(i));
-}
+  }
 
 return settings;
 }
 
-svg::Point Serializator::DeserializedPoint(const proto_catalogue_serialization::Point &proto_point)
+svg::Point Serializator::DeserializePoint(const proto_catalogue_serialization::Point &proto_point)
 {
     return {proto_point.x(),proto_point.y()};
 }
 
 svg::Color Serializator::DeserializeColor(const proto_catalogue_serialization::Color& proto_color)
 {
-    svg::Color result;
+
 
     if(proto_color.has_rgb()){
-        result = svg::Rgb{static_cast<uint8_t>(proto_color.rgb().red()),
+    auto    result = svg::Rgb{static_cast<uint8_t>(proto_color.rgb().red()),
                 static_cast<uint8_t>(proto_color.rgb().green()),
                 static_cast<uint8_t>(proto_color.rgb().blue())};
+    return  result;
     }else if(proto_color.has_rgba()){
-        result = svg::Rgba{static_cast<uint8_t>(proto_color.rgba().red()),
+        auto result = svg::Rgba{static_cast<uint8_t>(proto_color.rgba().red()),
                 static_cast<uint8_t>(proto_color.rgba().green()),
                 static_cast<uint8_t>(proto_color.rgba().blue()),
                 proto_color.rgba().opacity()};
-    }else /*if(color_.has_string_color())*/{
-        result = proto_color.string_color().color();
+    return  result;
+    }else if(proto_color.has_string_color()){
+        auto result = proto_color.string_color().color();
+    return  result;
+    }else{
+
     }
 
-    return  result;
+    throw std::runtime_error("Deserialized Color ERROR");
 }
 
-proto_catalogue_serialization::Point Serializator::MakeProtoPoint(int x, int y){
+proto_catalogue_serialization::Point Serializator::SerializedPoint(const svg::Point& point_){
     proto_catalogue_serialization::Point point;
-    point.set_x(x);
-    point.set_y(y);
+    point.set_x(point_.x);
+    point.set_y(point_.y);
 
     return point;
 }
 
-proto_catalogue_serialization::Color Serializator::MakeProtoColor(const svg::Color &color){
+proto_catalogue_serialization::Color Serializator::SerializedColor(const svg::Color &color){
     proto_catalogue_serialization::Color result;
-    if(const auto* ptr = std::get_if<svg::Rgb>(&color)){
-        result.mutable_rgb()->set_red(ptr->red);
-        result.mutable_rgb()->set_blue(ptr->blue);
-        result.mutable_rgb()->set_green(ptr->green);
-    }else if(const auto* ptr = std::get_if<svg::Rgba>(&color)){
-        result.mutable_rgba()->set_red(ptr->red);
-        result.mutable_rgba()->set_blue(ptr->blue);
-        result.mutable_rgba()->set_green(ptr->green);
-        result.mutable_rgba()->set_opacity(ptr->opacity);
-    }else /*if(const auto* ptr = std::get_if<std::string>(&color))*/{
-        const auto* ptr2 = std::get_if<std::string>(&color);
-        result.mutable_string_color()->set_color(*ptr2);
+    switch(color.index()){
+    case 1:{
+        proto_catalogue_serialization::String_color string_color;
+        string_color.set_color(std::get<1>(color));
+        *result.mutable_string_color() = std::move(string_color);
+        break;
+    }
+    case 2:{
+        *result.mutable_rgb() = SerializedRGB(std::get<2>(color));
+        break;
+    }
+    case 3:{
+        *result.mutable_rgba() = SerializedRGBA(std::get<3>(color));
+        break;
     }
 
-    return result;
+    }
+    return  result;
+}
+
+proto_catalogue_serialization::RGB_color Serializator::SerializedRGB(const svg::Rgb &rgb)
+{
+    proto_catalogue_serialization::RGB_color result;
+    result.set_red(rgb.red);
+    result.set_blue(rgb.blue);
+    result.set_green(rgb.green);
+
+    return  result;
+
+}
+
+proto_catalogue_serialization::RGBA_color Serializator::SerializedRGBA(const svg::Rgba &rgba)
+{
+    proto_catalogue_serialization::RGBA_color result;
+    result.set_red(rgba.red);
+    result.set_blue(rgba.blue);
+    result.set_green(rgba.green);
+    result.set_opacity(rgba.opacity);
+    return  result;
+
 }
 
 void Serializator::SerializeBuses(proto_catalogue_serialization::TransportCatalogue &catalog,
@@ -171,16 +200,14 @@ void Serializator::SerializeRenderSettings(proto_catalogue_serialization::Transp
     proto_settings.set_stop_label_font_size(settings.stop_label_font_size);
     proto_settings.set_bus_label_font_size(settings.bus_label_font_size);
 
-    *proto_settings.mutable_bus_label_offset() = MakeProtoPoint(settings.bus_label_offset.x,
-                                                                settings.bus_label_offset.y);
+    *proto_settings.mutable_bus_label_offset() = SerializedPoint(settings.bus_label_offset);
 
-    *proto_settings.mutable_stop_label_offset() = MakeProtoPoint(settings.stop_label_offset.x,
-                                                                 settings.stop_label_offset.y);
-    *proto_settings.mutable_underlayer_color()  = MakeProtoColor(settings.underlayer_color);
+    *proto_settings.mutable_stop_label_offset() = SerializedPoint(settings.stop_label_offset);
+    *proto_settings.mutable_underlayer_color()  = SerializedColor(settings.underlayer_color);
     proto_settings.set_underlayer_width(settings.underlayer_width);
 
     for(const auto& color:settings.color_palette){
-        *proto_settings.add_color_palette() = MakeProtoColor(color);
+        *proto_settings.add_color_palette() = SerializedColor(color);
 
     }
 
