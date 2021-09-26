@@ -1,0 +1,53 @@
+syntax = "proto3";
+
+package proto_catalogue_serialization;
+
+import "graph.proto";
+
+message WaitEdgeInfo{
+string stop_name = 1;
+double time = 2;
+}
+
+message BusEdgeInfo{
+string bus_name = 1;
+uint64 span_count = 2;
+double time  = 3;
+}
+
+message EdgeInfo{
+oneof test_oneof{
+
+WaitEdgeInfo wait_edge_info = 1;
+BusEdgeInfo bus_edge_info = 2;
+
+}
+}
+
+message StopPairVertexId{
+uint32 bus_wait_begin = 1;
+uint32 bus_wait_end = 2;
+}
+
+
+message RouterSettings {
+int32 bus_wait_time = 1;
+double bus_velocity = 2;
+}
+
+message StopToPairId{
+repeated uint32 stop_id = 1;
+repeated StopPairVertexId stop_pair_vretex_id = 2;
+}
+
+message EdgeIdToType{
+repeated uint32 edge_id = 1;
+repeated EdgeInfo edge_info = 2;
+}
+
+message TransportRouter {
+Graf graf = 1;
+RouterSettings router_settings = 2;
+StopToPairId stop_to_pair_id= 3;
+EdgeIdToType edge_id_to_tupe = 4;
+}

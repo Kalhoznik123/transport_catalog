@@ -1,0 +1,22 @@
+syntax = "proto3";
+
+package proto_catalogue_serialization;
+
+
+message IncidenceList{
+
+repeated uint64 EdgeId = 1;
+
+}
+
+message Edge {
+    uint32 stop_from = 1;
+    uint32 stop_to = 2;
+    double weight = 3;
+}
+
+
+message Graf{
+    repeated Edge edges = 1;
+    repeated IncidenceList incidence_lists = 2;
+}
