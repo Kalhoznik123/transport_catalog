@@ -46,8 +46,8 @@ repeated EdgeInfo edge_info = 2;
 }
 
 message TransportRouter {
-Graf graf = 1;
+Graf graph = 1;
 RouterSettings router_settings = 2;
 StopToPairId stop_to_pair_id= 3;
-EdgeIdToType edge_id_to_tupe = 4;
+EdgeIdToType edge_id_to_type = 4;
 }

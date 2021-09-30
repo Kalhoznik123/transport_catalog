@@ -21,7 +21,7 @@ class Reader {
 public:
   explicit Reader(transport::Catalogue& catalogue,
                   renderer::MapRenderer& renderer,
-                  /*router::TransportRouter& router,*/
+                  router::TransportRouter& router,
                   serialization::Serializator& serializator);
 
   // парсит текст из потоков в JSON
@@ -63,7 +63,7 @@ private:
 private:
   transport::Catalogue& catalogue_;
  renderer::MapRenderer& renderer_;
-  //router::TransportRouter& router_;
+  router::TransportRouter& router_;
   serialization::Serializator& serializator_;
 
   json::Array base_requests_;

@@ -27,29 +27,28 @@ int main(int argc, char* argv[]) {
 
         transport::renderer::MapRenderer renderer;
         transport::Catalogue transport_catalogue;
-//        transport::router::TransportRouter transport_router;
+        transport::router::TransportRouter transport_router;
         transport::serialization::Serializator serializator;
-        transport::Reader reader(transport_catalogue,renderer,/*transport_router,*/serializator);
+        transport::Reader reader(transport_catalogue,renderer,transport_router,serializator);
 
         reader.ParseRequests(std::cin);
-        transport::RequestHandler rh(transport_catalogue,renderer/*,transport_router*/);
-        serializator.SerizalizeCatalog(rh);
+        transport::RequestHandler rh(transport_catalogue,renderer,transport_router);
+//build transport router hear
+        transport_router.BuildRouter(transport_catalogue);
 
+        serializator.SerizalizeCatalog(rh);
         // make base here
 
     } else if (mode == "process_requests"sv) {
         transport::renderer::MapRenderer renderer;
         transport::Catalogue transport_catalogue;
-       // transport::router::TransportRouter transport_router;
+        transport::router::TransportRouter transport_router;
         transport::serialization::Serializator serializator;
-        transport::Reader reader(transport_catalogue,renderer,/*transport_router,*/serializator);
+        transport::Reader reader(transport_catalogue,renderer,transport_router,serializator);
 
         reader.ParseRequests(std::cin);
-
-        serializator.DeserializeCatalog(transport_catalogue,renderer);
-
+        serializator.DeserializeCatalog(transport_catalogue,renderer,transport_router);
         reader.PrintReply(std::cout);
-
         // process requests here
 
     } else {

@@ -2,11 +2,11 @@ cmake_minimum_required(VERSION 3.10)
 
 project(transport_catalogue CXX)
 set(CMAKE_CXX_STANDARD 17)
-list(APPEND CMAKE_PREFIX_PATH "/home/ivan/Documents/protobuf/package")
+#list(APPEND CMAKE_PREFIX_PATH "/home/ivan/Documents/protobuf/package")
 find_package(Protobuf REQUIRED)
 find_package(Threads REQUIRED)
 
-protobuf_generate_cpp(PROTO_SRCS PROTO_HDRS transport_catalogue.proto map_renderer.proto svg.proto)
+protobuf_generate_cpp(PROTO_SRCS PROTO_HDRS transport_catalogue.proto map_renderer.proto svg.proto transport_router.proto graph.proto)
 
 set(TRANSPORT_FILES
     json_reader.h json_reader.cpp

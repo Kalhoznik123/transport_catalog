@@ -103,9 +103,20 @@ const std::unordered_map<std::pair<const transport::Stop *, const transport::Sto
     return stop_pair_to_distance_;
 }
 
-const transport::Stop &transport::Catalogue::GetStopById(int id) const
+const transport::Stop &transport::Catalogue::GetStopByIndex(int index) const
 {
-    return stops_[id];
+    return stops_[index];
+}
+
+const transport::Bus &transport::Catalogue::GetBusByIndex(int index) const
+{
+    return buses_[index];
+}
+
+const int transport::Catalogue::GetStopIndex(const Stop &stop) const{
+return std::find_if(stops_.begin(),stops_.end(),[&stop](const auto& rhs){
+    return stop.name == rhs.name;
+}) - stops_.begin();
 }
 
 transport::BusInformation transport::Catalogue::GetBusInformation(const transport::Bus* bus) const {

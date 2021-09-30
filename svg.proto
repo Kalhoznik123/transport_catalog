@@ -2,10 +2,6 @@ syntax = "proto3";
 
 package proto_catalogue_serialization;
 
-message String_color{
-string color = 1;
-}
-
 message RGB_color{
 uint32 red = 1;
 uint32 green = 2;
@@ -20,11 +16,11 @@ double opacity = 4;
 }
 
 message Color{
-
-String_color string_color = 1;
-RGB_color RGB = 2;
-RGBA_color RGBA = 3; 
-
+oneof variant{
+string string_color = 1;
+RGB_color RGB_color = 2;
+RGBA_color RGBA_color = 3;
+}
 }
 
 message Point{

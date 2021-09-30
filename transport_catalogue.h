@@ -60,8 +60,11 @@ public:
 
    const std::unordered_map<std::pair<const Stop*, const Stop*>, double, StopsPairHasher>& GetDistancesBetweenStops() const ;
 
-   const Stop& GetStopById(int id) const;
+   const Stop& GetStopByIndex(int index) const;
 
+   const Bus& GetBusByIndex(int index) const;
+
+   const int GetStopIndex(const Stop& stop) const;
 private:
 
     std::unordered_map<std::string_view, const Stop*, std::hash<std::string_view>> name_to_stop_;
