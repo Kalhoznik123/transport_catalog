@@ -13,20 +13,18 @@ namespace renderer {
 using namespace std::string_literals;
 
 struct RenderSettings {
-    double width /*= 1200.0*/;
-    double height /*= 1200.0*/;
-    double padding /*= 50.0*/;
-    double line_width /*= 14.0*/;
-    double stop_radius /*= 5.0*/;
-    int stop_label_font_size /*= 20*/;
-    int bus_label_font_size /*= 20*/;
-    svg::Point bus_label_offset /*= {7.0, 15.0}*/;
-
-    svg::Point stop_label_offset /*= {7.0, -3.0}*/;
-
-    svg::Color underlayer_color /*= svg::Rgba(255, 255, 255, 0.85)*/;
-    double underlayer_width /*= 3.0*/;
-    std::vector<svg::Color> color_palette /*= {"green"s, svg::Rgb(255, 160, 0), "red"s}*/;
+    double width;
+    double height;
+    double padding;
+    double line_width;
+    double stop_radius;
+    int stop_label_font_size;
+    int bus_label_font_size;
+    svg::Point bus_label_offset;
+    svg::Point stop_label_offset;
+    svg::Color underlayer_color;
+    double underlayer_width;
+    std::vector<svg::Color> color_palette;
 };
 
 inline const double EPSILON = 1e-6;

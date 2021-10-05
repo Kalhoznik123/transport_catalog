@@ -6,7 +6,12 @@ set(CMAKE_CXX_STANDARD 17)
 find_package(Protobuf REQUIRED)
 find_package(Threads REQUIRED)
 
-protobuf_generate_cpp(PROTO_SRCS PROTO_HDRS transport_catalogue.proto map_renderer.proto svg.proto transport_router.proto graph.proto)
+protobuf_generate_cpp(PROTO_SRCS PROTO_HDRS
+    transport_catalogue.proto
+    map_renderer.proto
+    svg.proto
+    transport_router.proto
+    graph.proto)
 
 set(TRANSPORT_FILES
     json_reader.h json_reader.cpp
@@ -24,7 +29,8 @@ set(TRANSPORT_FILES
     svg.h svg.cpp
     main.cpp
     request_handler.cpp request_handler.h
-    transport_catalogue.proto)
+    #transport_catalogue.proto
+    )
 
 add_executable(transport_catalogue ${PROTO_SRCS} ${PROTO_HDRS} ${TRANSPORT_FILES})
 target_include_directories(transport_catalogue PUBLIC ${Protobuf_INCLUDE_DIRS})

@@ -72,15 +72,11 @@ void Reader::ParseRequests(std::istream& input) {
 }
 
 void Reader::PrintReply(std::ostream& out) const {
-
     Print(ReturnStat(), out);
 }
 
-std::string Reader::GetSerializationSettings() const
-{
-
-    auto result = serialization_settings.at("file").AsString();
-
+std::string Reader::GetSerializationSettings() const{
+    const auto result = serialization_settings.at("file").AsString();
     return result;
 }
 
