@@ -30,9 +30,9 @@ int main(int argc, char* argv[]) {
         transport::router::TransportRouter transport_router;
         transport::serialization::Serializator serializator;
         transport::Reader reader(transport_catalogue,renderer,transport_router,serializator);
-
         reader.ParseRequests(std::cin);
-        transport_router.BuildRouter(transport_catalogue);
+
+        transport_router.BuildRouter(transport_catalogue); //build router hear
 
         serializator.Serizalize(transport_catalogue,renderer,transport_router);
         // make base here
@@ -45,7 +45,7 @@ int main(int argc, char* argv[]) {
         transport::Reader reader(transport_catalogue,renderer,transport_router,serializator);
 
         reader.ParseRequests(std::cin);
-        serializator.DeserializeCatalog(transport_catalogue,renderer,transport_router);
+        serializator.Deserialize(transport_catalogue,renderer,transport_router);
         reader.PrintReply(std::cout);
         // process requests here
 

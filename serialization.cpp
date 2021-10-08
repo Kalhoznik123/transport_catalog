@@ -28,13 +28,12 @@ void Serializator::Serizalize(const Catalogue& ctl,const renderer::MapRenderer& 
 
 }
 
-void Serializator::DeserializeCatalog(Catalogue &catalog,renderer::MapRenderer& renderer, router::TransportRouter& router)
+void Serializator::Deserialize(Catalogue &catalog,renderer::MapRenderer& renderer, router::TransportRouter& router)
 {
     proto_catalogue_serialization::TransportCatalogue proto_catalog;
     std::ifstream in(file_,std::ios::binary);
 
     proto_catalog.ParseFromIstream(&in);
-
 
     DeserializeStops(catalog,proto_catalog);
     DeserializeDistances(catalog,proto_catalog);

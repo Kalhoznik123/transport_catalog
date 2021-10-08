@@ -23,7 +23,7 @@ public:
 
     void Serizalize(const Catalogue& ctl,const renderer::MapRenderer& renderer,const router::TransportRouter& router);
 
-    void DeserializeCatalog(transport::Catalogue& catalog,renderer::MapRenderer& renderer,router::TransportRouter& router);
+    void Deserialize(transport::Catalogue& catalog,renderer::MapRenderer& renderer,router::TransportRouter& router);
 
 private:
 
