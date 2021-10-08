@@ -10,18 +10,18 @@ namespace serialization {
 
 
 
-void Serializator::SerizalizeCatalog(const RequestHandler& rh){
+void Serializator::Serizalize(const Catalogue& ctl,const renderer::MapRenderer& renderer,const router::TransportRouter& router){
 
     std::unordered_map<std::string, int> stop_name_to_index;
     proto_catalogue_serialization::TransportCatalogue catalog;
 
-    SerializeStopsAndFillMap(catalog,rh,stop_name_to_index);
-    SerializeBuses(catalog,rh,stop_name_to_index);
-    SerializeDistancesBetweenStops(catalog,rh,stop_name_to_index);
+    SerializeStopsAndFillMap(catalog,ctl,stop_name_to_index);
+    SerializeBuses(catalog,ctl,stop_name_to_index);
+    SerializeDistancesBetweenStops(catalog,ctl,stop_name_to_index);
 
-    SerializeRenderSettings(catalog,rh);
+    SerializeRenderSettings(catalog,renderer);
 
-    *catalog.mutable_transport_router() = SerializeTransportRouter(rh);
+    *catalog.mutable_transport_router() = SerializeTransportRouter(router,ctl);
 
     std::ofstream out(file_,std::ios::binary);
     catalog.SerializeToOstream(&out);
@@ -259,13 +259,11 @@ proto_catalogue_serialization::RouterSettings Serializator::SerializeRouterSetti
     return result;
 }
 
-proto_catalogue_serialization::TransportRouter Serializator::SerializeTransportRouter(const RequestHandler &rh){
+proto_catalogue_serialization::TransportRouter Serializator::SerializeTransportRouter(const router::TransportRouter &router,const transport::Catalogue& ctl){
 
     proto_catalogue_serialization::TransportRouter proto_router;
-
-
     //add adges to proto_router
-    for(const auto& edge: rh.GetRouterGrafEages()){
+    for(const auto& edge: router.GetGrafEdges()){
         proto_catalogue_serialization::Edge proto_edge;
         proto_edge.set_stop_from(edge.from);
         proto_edge.set_stop_to(edge.to);
@@ -275,7 +273,7 @@ proto_catalogue_serialization::TransportRouter Serializator::SerializeTransportR
     }
 
     //add increase lists to proto_router
-    for(const auto& increase_list : rh.GetRouterGrafIncidenceLists()){
+    for(const auto& increase_list : router.GetGrafIncidenceLists()){
         proto_catalogue_serialization::IncidenceList list;
         for(size_t edge_id: increase_list){
             list.add_edgeid(edge_id);
@@ -283,18 +281,18 @@ proto_catalogue_serialization::TransportRouter Serializator::SerializeTransportR
         *proto_router.mutable_graph()->add_incidence_lists() = std::move(list);
     }
 
-    *proto_router.mutable_router_settings() = SerializeRouterSettings(rh.GetRoutingSettings());
-    *proto_router.mutable_stop_to_pair_id() = SerializeRouterStopToPairId(rh,rh.GetRouterStopToPairID());
-    *proto_router.mutable_edge_id_to_type() = SerializeEdgeIdToType(rh.GetRouterEdgeIdToType());
+    *proto_router.mutable_router_settings() = SerializeRouterSettings(router.GetRoutingSettings());
+    *proto_router.mutable_stop_to_pair_id() = SerializeRouterStopToPairId(ctl,router.GetStopToPairID());
+    *proto_router.mutable_edge_id_to_type() = SerializeEdgeIdToType(router.GetEdgeIdToType());
     return proto_router;
 }
 
-proto_catalogue_serialization::StopToPairId Serializator::SerializeRouterStopToPairId(const RequestHandler& rh,
+proto_catalogue_serialization::StopToPairId Serializator::SerializeRouterStopToPairId(const transport::Catalogue& rh,
                                                                                       const std::unordered_map<const Stop *, router::StopPairVertexId> &stop_to_pair_id) const{
     proto_catalogue_serialization::StopToPairId result;
 
     for(const auto&[stop,stop_pair_vertex_id]:stop_to_pair_id){
-        result.add_stop_id(rh.GetTransportCatalogStopIndex(*stop));
+        result.add_stop_id(rh.GetStopIndex(*stop));
 
         proto_catalogue_serialization::StopPairVertexId proto_stop_pair_vertex_id;
 
@@ -342,9 +340,9 @@ proto_catalogue_serialization::EdgeInfo Serializator::SerializeEdgeInfo(const ro
 }
 
 void Serializator::SerializeBuses(proto_catalogue_serialization::TransportCatalogue &catalog,
-                                  const RequestHandler& rh,
+                                  const Catalogue& ctl,
                                   const std::unordered_map<std::string, int> &stops_index){
-    const auto& buses = rh.GetBuses();
+    const auto& buses = ctl.GetBuses();
 
     for(const auto& bus :buses){
         proto_catalogue_serialization::Bus proto_bus;
@@ -362,9 +360,9 @@ void Serializator::SerializeBuses(proto_catalogue_serialization::TransportCatalo
 }
 
 void Serializator::SerializeDistancesBetweenStops(proto_catalogue_serialization::TransportCatalogue &catalog,
-                                                  const RequestHandler &rh,
+                                                  const Catalogue &ctl,
                                                   const std::unordered_map<std::string, int> &stops_index){
-    const auto& distances = rh.GetDistancesBetweenStops();
+    const auto& distances = ctl.GetDistancesBetweenStops();
 
     for(const auto& [stops_pair, distance]: distances){
         proto_catalogue_serialization::DistanceBetweenStops proto_distance;
@@ -377,9 +375,9 @@ void Serializator::SerializeDistancesBetweenStops(proto_catalogue_serialization:
 
 }
 
-void Serializator::SerializeRenderSettings(proto_catalogue_serialization::TransportCatalogue &catalog, const RequestHandler &rh){
+void Serializator::SerializeRenderSettings(proto_catalogue_serialization::TransportCatalogue &catalog, const renderer::MapRenderer &renderer){
     proto_catalogue_serialization::RendererSettings proto_settings;
-    const auto& settings = rh.GetRendererSettings();
+    const auto& settings = renderer.GetRenderSetting();
 
     proto_settings.set_width(settings.width);
     proto_settings.set_height(settings.height);
@@ -454,10 +452,10 @@ void Serializator::DeserializeStops(Catalogue& catalog, const proto_catalogue_se
 }
 
 void Serializator::SerializeStopsAndFillMap(proto_catalogue_serialization::TransportCatalogue &catalog,
-                                            const RequestHandler &rh,
+                                            const Catalogue &ctl,
                                             std::unordered_map<std::string, int>& stops_index)
 {
-    const auto& stops = rh.GetStops();
+    const auto& stops = ctl.GetStops();
     int index = 0 ;
     for(const auto& stop:stops){
         stops_index[stop.name] = index++;

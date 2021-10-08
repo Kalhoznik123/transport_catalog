@@ -32,11 +32,9 @@ int main(int argc, char* argv[]) {
         transport::Reader reader(transport_catalogue,renderer,transport_router,serializator);
 
         reader.ParseRequests(std::cin);
-        transport::RequestHandler rh(transport_catalogue,renderer,transport_router);
-//build transport router hear
         transport_router.BuildRouter(transport_catalogue);
 
-        serializator.SerizalizeCatalog(rh);
+        serializator.Serizalize(transport_catalogue,renderer,transport_router);
         // make base here
 
     } else if (mode == "process_requests"sv) {

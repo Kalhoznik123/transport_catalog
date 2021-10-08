@@ -21,7 +21,7 @@ public:
         file_ = std::move(file);
     }
 
-    void SerizalizeCatalog(const RequestHandler& rh );
+    void Serizalize(const Catalogue& ctl,const renderer::MapRenderer& renderer,const router::TransportRouter& router);
 
     void DeserializeCatalog(transport::Catalogue& catalog,renderer::MapRenderer& renderer,router::TransportRouter& router);
 
@@ -50,26 +50,23 @@ private:
 
 
     proto_catalogue_serialization::RouterSettings SerializeRouterSettings(const router::RoutingSettings& settings );
-    proto_catalogue_serialization::TransportRouter SerializeTransportRouter(const RequestHandler& rh);
-    proto_catalogue_serialization::StopToPairId SerializeRouterStopToPairId(const RequestHandler& rh,const std::unordered_map<const Stop*, router::StopPairVertexId>& stop_to_pair_id)const;
+    proto_catalogue_serialization::TransportRouter SerializeTransportRouter(const router::TransportRouter &rh,const transport::Catalogue& ctl);
+    proto_catalogue_serialization::StopToPairId SerializeRouterStopToPairId(const transport::Catalogue& rh,const std::unordered_map<const Stop*, router::StopPairVertexId>& stop_to_pair_id)const;
     proto_catalogue_serialization::EdgeIdToType SerializeEdgeIdToType(const std::unordered_map<graph::EdgeId, router::EdgeInfo>& edge_id_to_type) const ;
     proto_catalogue_serialization::EdgeInfo SerializeEdgeInfo(const router::EdgeInfo& edge_info) const;
 
     static void SerializeStopsAndFillMap(proto_catalogue_serialization::TransportCatalogue& catalog,
-                                         const transport::RequestHandler& rh,
+                                         const transport::Catalogue& rh,
                                          std::unordered_map<std::string,int>& stops_index);
     static void SerializeBuses(proto_catalogue_serialization::TransportCatalogue& catalog,
-                               const RequestHandler& rh,
+                               const Catalogue& ctl,
                                const std::unordered_map<std::string,int>& stops_index);
 
     static void SerializeDistancesBetweenStops(proto_catalogue_serialization::TransportCatalogue& catalog,
-                                               const RequestHandler& rh,
+                                               const Catalogue &ctl,
                                                const std::unordered_map<std::string,int>& stops_index);
 
-    static void SerializeRenderSettings(proto_catalogue_serialization::TransportCatalogue& catalog,
-                                        const RequestHandler& rh );
-
-
+    static void SerializeRenderSettings(proto_catalogue_serialization::TransportCatalogue& catalog,const renderer::MapRenderer &renderer);
 
     static void DeserializeStops(transport::Catalogue& catalog,const proto_catalogue_serialization::TransportCatalogue& proto_catalog);
 
